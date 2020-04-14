@@ -5,10 +5,6 @@
 ****************************************************************************************************"""
 
 import connections as cn
-import pandas as pd
-import numpy as np
-import pickle
-import xgboost
 
 """****************************************************************************************************
 * Description: method to return a list of customers sensitive to leave the company in the next year

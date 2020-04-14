@@ -17,7 +17,6 @@ app = Flask(__name__)
 api = Api(app, prefix="/v1")
 auth = HTTPBasicAuth()
 
-
 """****************************************************************************************************
 * Description: basic authentication implementation
 * INUT: username and password
