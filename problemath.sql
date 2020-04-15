@@ -26,7 +26,7 @@ CREATE TABLE `dependency` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Id_Problem` int DEFAULT NULL,
   `Id_Solu` int DEFAULT NULL,
-  `URL` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `URL` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`Id`),
   KEY `FK_DEPENDENCY_PROBLEM_idx` (`Id_Problem`),
   KEY `FK_DEPENDENCY_SOLUTION_idx` (`Id_Solu`),
@@ -53,12 +53,12 @@ DROP TABLE IF EXISTS `problem`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `problem` (
   `Id` int NOT NULL AUTO_INCREMENT,
-  `Magacine` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Tex` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `Proposer` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Magacine` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Tex` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
+  `Proposer` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `Dep_State` tinyint NOT NULL,
-  `URL_PDF_State` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `URL_PDF_Full` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `URL_PDF_State` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `URL_PDF_Full` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `URL_PDF_State_UNIQUE` (`URL_PDF_State`),
   UNIQUE KEY `URL_PDF_Full_UNIQUE` (`URL_PDF_Full`)
@@ -90,7 +90,7 @@ CREATE TABLE `problem_tags` (
   KEY `FK_PROBLEM_TAG_TAG_idx` (`Id_Tag`),
   CONSTRAINT `FK_PROBLEM_TAG_PROBLEM` FOREIGN KEY (`Id_Problem`) REFERENCES `problem` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_PROBLEM_TAG_TAG` FOREIGN KEY (`Id_Tag`) REFERENCES `tags` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,8 +112,8 @@ DROP TABLE IF EXISTS `solution`;
 CREATE TABLE `solution` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Id_Problem` int NOT NULL,
-  `Tex` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `Solver` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Tex` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
+  `Solver` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `Dep_Solu` tinyint NOT NULL,
   PRIMARY KEY (`Id`),
   KEY `FK_SOLUTION_PROBLEM_idx` (`Id_Problem`),
@@ -139,7 +139,7 @@ DROP TABLE IF EXISTS `tags`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tags` (
   `Id` int NOT NULL AUTO_INCREMENT,
-  `Name` varchar(50) CHARACTER SET utf8 DEFAULT NULL,
+  `Name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -162,8 +162,8 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `Id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `password` char(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `username` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` char(64) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -188,4 +188,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-15 13:44:18
+-- Dump completed on 2020-04-15 13:52:50
