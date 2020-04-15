@@ -4,7 +4,7 @@
 * Date: 30/10/2019
 ****************************************************************************************************"""
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from flask_restful import Resource, Api
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -32,13 +32,12 @@ def verify(username, password):
 		conexion = None
 		try:
 			conexion = cn.dbConnectMySQL()
-			mycursor = conexion.cursor()
-			mycursor.execute("SELECT password FROM users WHERE username =" + "\'" + username + "\'")
+			mycursor = conexion.cursor(prepared=True)
+			sqlQuery = " SELECT * FROM users WHERE username=%s and password=SHA1(%s) "
+			mycursor.execute(sqlQuery, (username,password,))
 			_password = mycursor.fetchone()
-
 			mycursor.close()
-
-			verified = (not (_password is None) and check_password_hash( _password[0],password))
+			verified = (not (_password is None))
 
 		except cn.mySqlException as e:
 			raise e
@@ -345,15 +344,17 @@ class test(Resource):
 		con = None
 		try:
 			conexion = cn.dbConnectMySQL()
-			mycursor = conexion.cursor()
-			mycursor.execute("SELECT username FROM users")
-			row_headers=[x[0] fpr x in mycursor.description]
+			mycursor = conexion.cursor(prepared=True)
+			sqlQuery = "SELECT username FROM users WHERE username=%s"
+			mycursor.execute(sqlQuery, ("almahill",))
+			row_headers=[x[0] for x in mycursor.description]
 			users_data = mycursor.fetchall()
 			json_data=[]
 			for user in users_data:
-				json_data.append(dict(zip(row_headers,user)))
-			return json.dumps(json_data)
+				json_data.append(dict(zip(row_headers,[data.decode("utf-8") for data in user])))
 			mycursor.close()
+
+			return jsonify(json_data)
 
 		except cn.mySqlException as e:
 			try:
