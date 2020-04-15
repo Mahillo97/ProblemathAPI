@@ -333,6 +333,45 @@ class userManagement(Resource):
 				app.logger.exception('Unable to close connection to the database', e2)
 
 """****************************************************************************************************
+* Description: test
+* INUT: 
+* OUTPUT: -
+****************************************************************************************************"""
+class test(Resource):
+
+	def get(self):
+
+		#Create the connection
+		con = None
+		try:
+			conexion = cn.dbConnectMySQL()
+			mycursor = conexion.cursor()
+			mycursor.execute("SELECT username FROM users")
+			row_headers=[x[0] fpr x in mycursor.description]
+			users_data = mycursor.fetchall()
+			json_data=[]
+			for user in users_data:
+				json_data.append(dict(zip(row_headers,user)))
+			return json.dumps(json_data)
+			mycursor.close()
+
+		except cn.mySqlException as e:
+			try:
+				if not (con is None):
+					con.rollback()
+				app.logger.exception('mySQL Exception', e)
+				abort(500)
+			except cn.mySqlException as eRoll:
+				app.logger.exception('mySQL Exception', e)
+				abort(500)
+		finally:
+			try:
+				if not (con is None):
+					con.close()
+			except mySqlException as eCon:
+				app.logger.exception('Unable to close connection to the database', e2)
+
+"""****************************************************************************************************
 * Methods definition
 ****************************************************************************************************"""
 api.add_resource(customersChurnList,'/customers/churn')
@@ -342,6 +381,7 @@ api.add_resource(getCustomerServs,'/customers/servs/<customer_id>')
 api.add_resource(getCustomerBills,'/customers/bills/<customer_id>')
 api.add_resource(userManagement,'/users')
 api.add_resource(ping,'/ping')
+api.add_resource(test,'/test')
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=True)
