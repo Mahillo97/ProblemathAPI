@@ -11,35 +11,54 @@ import connections as cn
 * INPUT: -
 * OUTPUT: json object with a list of customers sensitive who might leave.
 ****************************************************************************************************"""
-def customersChurnList(con):
 
-	#Select in the database to get the list of clients that will churn
+
+def getProblems(con, tags, mag, prop):
+
 	try:
-		sqlQuery = 'SELECT * FROM tblModelChurn WHERE activosFech1=1'
-		dataClientIDs = pd.read_sql(sqlQuery, con)
-		dataClient = dataClientIDs.drop(['sampleID', 'activosFech1', 'activosFech2'], axis=1)
+		# Check tha variables to create the Query String
+		sqlQueryBegging = 'SELECT P.Id, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
+					FROM problem as p join problem_tag as PT on P.Id=PT.Id_Problem JOIN tag as T on PT.Id_Tag=T.Id join problem_tag as PT2 on PT2.Id_Problem = P.Id JOIN tag as T2 on PT2.Id_Tag=T2.Id '
+		sqlQueryWhere = ''
+		sqlQueryEnd = 'GROUP BY P.Id ORDER BY COUNT(Distinct T.Id) DESC'
+		if(tags or mag or prop):
+			sqlQueryWhere = 'WHERE '
+			tuple_values=()
+			if(tags):
+				list_tags = tags.split(",")
+				tuple_values = tuple_values + tuple(list_tags)
+				for i in range(len(list_tags)):
+					if i == 0:
+						sqlQueryWhere = sqlQueryWhere + 'T.Name=%s '
+					else:
+						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s '
+			if(mag):
+				if(tags):
+					sqlQueryWhere = sqlQueryWhere + 'and '
+				tuple_values = tuple_values + (mag,)
+				sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
+			if(prop):
+				if(mag or tags):
+					sqlQueryWhere = sqlQueryWhere + 'and '
+				tuple_values = tuple_values + (prop,)
+				sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
 
-		#Call churn model to execute prediction
-		with open('ModeloChurnPrediction/modelChurn.pkl', 'rb') as pickle_file:
-			model = pickle.load(pickle_file)
-		pred_aux = model.predict_proba(dataClient)
-		pred_list = []
-		for pred, ID, fact in zip(pred_aux, dataClientIDs.sampleID, dataClientIDs.factAnual):
-			score = pred[0]*100
-			if score>50:
-				dictClient = dict({'ID':int(ID),'score':float(score), 'turnover':float(fact)})
-				#'fact':float(client.factAnual)
-				pred_list = np.append(pred_list,dictClient)
-		ord_pred_list = sorted(list(pred_list), key=lambda k: k['turnover'], reverse=True)
-
-		#Build a JSON with customer whose prediction is 0
-		return {'list':ord_pred_list}
-
-	except cn.sqlServerException as e:
+		sqlQuery = sqlQueryBegging + sqlQueryWhere + sqlQueryEnd
+		
+		#Execute the query
+		mycursor = con.cursor(prepared=True)
+		mycursor.execute(sqlQuery, tuple_values)
+		row_headers = [x[0].lower() for x in mycursor.description]
+		problems_data = mycursor.fetchall()
+		json_data = []
+		for problem in problems_data:
+			json_data.append(
+				dict(zip(row_headers, [data.decode("utf-8") if counter != len(problem) else data.decode("utf-8").split(",") for counter, data in enumerate(problem)])))
+			mycursor.close()
+			
+		return dict(problems=json_data)
+	except cn.mySqlException as e:
 		raise e
-	except cn.mySqlException as err:
-		raise err
-
 
 """****************************************************************************************************
 * Description: method to return a churn prediction for one customer
@@ -48,13 +67,13 @@ def customersChurnList(con):
 ****************************************************************************************************"""
 def getCustomerChurn(con, customer_id):
 
-	#Select in the database the info for the selected customer
+	# Select in the database the info for the selected customer
 	try:
 		sqlQuery = 'SELECT * FROM tblModelChurn WHERE sampleID='+str(customer_id)
 		dataClient = pd.read_sql(sqlQuery, con)
 		dataClient = dataClient.drop(['sampleID', 'activosFech1', 'activosFech2'], axis=1)
 
-		#Call churn model to execute prediction
+		# Call churn model to execute prediction
 		with open('ModeloChurnPrediction/modelChurn.pkl', 'rb') as pickle_file:
 			model = pickle.load(pickle_file)
 		pred = model.predict_proba(dataClient)
@@ -81,7 +100,7 @@ def isCustomerActive(con, customer_id):
 
 	isCustomer = False
 
-	#Select in the database the customer
+	# Select in the database the customer
 	try:
 		sqlQuery = 'SELECT * FROM tblDataClientChurn WHERE sampleID='+str(customer_id)
 		dataClient = pd.read_sql(sqlQuery, con)
@@ -102,13 +121,13 @@ def isCustomerActive(con, customer_id):
 ****************************************************************************************************"""
 def getCustomerData(con, customer_id):
 
-	#Select in the database the info for the selected customer
+	# Select in the database the info for the selected customer
 
 	try:
 		sqlQuery = 'SELECT * FROM tblDataClientChurn WHERE sampleID='+str(customer_id)
 		dataClient = pd.read_sql(sqlQuery, con)
 
-		#Return the client data
+		# Return the client data
 		dictClient = dict()
 		for value, column in zip(dataClient.values[0],dataClient.columns):
 			if column == "sampleID":
@@ -130,13 +149,13 @@ def getCustomerData(con, customer_id):
 ****************************************************************************************************"""
 def getCustomerBills(con, customer_id):
 
-	#Select in the database the info for the selected customer
+	# Select in the database the info for the selected customer
 
 	try:
 		sqlQuery = 'SELECT * FROM tblFacturas where IDCliente =' + str(customer_id)
 		billsClient = pd.read_sql(sqlQuery, con)
 
-		#Return the client bills
+		# Return the client bills
 		bill_list = []
 		for index, bill in billsClient.iterrows():
 			dictBill = dict()
@@ -163,13 +182,13 @@ def getCustomerBills(con, customer_id):
 ****************************************************************************************************"""
 def getCustomerServs(con, customer_id):
 
-	#Select in the database the info for the selected customer
+	# Select in the database the info for the selected customer
 
 	try:
 		sqlQuery = 'SELECT * FROM tblServicios where IDCliente =' + str(customer_id) + '  and Estado = \'ACTIVO\''
 		servsClient = pd.read_sql(sqlQuery, con)
 
-		#Return the client bills
+		# Return the client bills
 		serv_list = []
 		for index, serv in servsClient.iterrows():
 			dictServ = dict()
