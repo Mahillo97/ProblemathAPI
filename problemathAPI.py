@@ -44,7 +44,7 @@ def verify(username, password):
             raise e
         finally:
             try:
-                if conexion is not None:
+                if con is not None:
                     con.close()
             except cn.mySqlException as eCon:
                 raise eCon
@@ -405,7 +405,7 @@ class test(Resource):
 """****************************************************************************************************
 * Methods definition
 ****************************************************************************************************"""
-api.add_resource(customersChurnList, '/customers/churn')
+api.add_resource(problemQuery, '/users/problems')
 api.add_resource(getCustomerChurn, '/customers/churn/<customer_id>')
 api.add_resource(getCustomerData, '/customers/<customer_id>')
 api.add_resource(getCustomerServs, '/customers/servs/<customer_id>')

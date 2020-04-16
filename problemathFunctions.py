@@ -17,19 +17,21 @@ def getProblems(con, tags, mag, prop):
 
 	try:
 		# Check tha variables to create the Query String
-		sqlQueryBegging = 'SELECT P.Id, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
-					FROM problem as p join problem_tag as PT on P.Id=PT.Id_Problem JOIN tag as T on PT.Id_Tag=T.Id join problem_tag as PT2 on PT2.Id_Problem = P.Id JOIN tag as T2 on PT2.Id_Tag=T2.Id '
+		sqlQueryBeginning = 'SELECT P.Id, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
+					FROM problem as P join problem_tag as PT on P.Id=PT.Id_Problem JOIN tag as T on PT.Id_Tag=T.Id join problem_tag as PT2 on PT2.Id_Problem = P.Id JOIN tag as T2 on PT2.Id_Tag=T2.Id '
 		sqlQueryWhere = ''
 		sqlQueryEnd = 'GROUP BY P.Id ORDER BY COUNT(Distinct T.Id) DESC'
+		tuple_values=()
 		if(tags or mag or prop):
 			sqlQueryWhere = 'WHERE '
-			tuple_values=()
 			if(tags):
 				list_tags = tags.split(",")
 				tuple_values = tuple_values + tuple(list_tags)
 				for i in range(len(list_tags)):
 					if i == 0:
-						sqlQueryWhere = sqlQueryWhere + 'T.Name=%s '
+						sqlQueryWhere = sqlQueryWhere + '(T.Name=%s '
+					elif i==len(list_tags)-1:
+						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s) '
 					else:
 						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s '
 			if(mag):
@@ -43,7 +45,7 @@ def getProblems(con, tags, mag, prop):
 				tuple_values = tuple_values + (prop,)
 				sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
 
-		sqlQuery = sqlQueryBegging + sqlQueryWhere + sqlQueryEnd
+		sqlQuery = sqlQueryBeginning + sqlQueryWhere + sqlQueryEnd
 		
 		#Execute the query
 		mycursor = con.cursor(prepared=True)
@@ -52,8 +54,9 @@ def getProblems(con, tags, mag, prop):
 		problems_data = mycursor.fetchall()
 		json_data = []
 		for problem in problems_data:
+			print(problem)
 			json_data.append(
-				dict(zip(row_headers, [data.decode("utf-8") if counter != len(problem) else data.decode("utf-8").split(",") for counter, data in enumerate(problem)])))
+				dict(zip(row_headers, [data if not isinstance(data,bytearray) else data.decode("utf-8") if counter != len(problem)-1 else data.decode("utf-8").split(",") for counter, data in enumerate(problem)])))
 			mycursor.close()
 			
 		return dict(problems=json_data)
