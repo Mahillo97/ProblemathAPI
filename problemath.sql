@@ -53,7 +53,7 @@ DROP TABLE IF EXISTS `problem`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `problem` (
   `Id` int NOT NULL AUTO_INCREMENT,
-  `Magacine` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Magazine` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `Tex` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
   `Proposer` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `Dep_State` tinyint NOT NULL,
@@ -62,7 +62,7 @@ CREATE TABLE `problem` (
   PRIMARY KEY (`Id`),
   UNIQUE KEY `URL_PDF_State_UNIQUE` (`URL_PDF_State`),
   UNIQUE KEY `URL_PDF_Full_UNIQUE` (`URL_PDF_Full`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,17 +71,18 @@ CREATE TABLE `problem` (
 
 LOCK TABLES `problem` WRITE;
 /*!40000 ALTER TABLE `problem` DISABLE KEYS */;
+INSERT INTO `problem` VALUES (1,NULL,'tex','Ciaurri',0,'url.pdf','url2.pdf'),(2,'Gaceta','tex2','Mahillo',1,'ur3l.pdf','url4.pdf'),(3,NULL,'tex',NULL,0,'url','url7.pdf');
 /*!40000 ALTER TABLE `problem` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `problem_tags`
+-- Table structure for table `problem_tag`
 --
 
-DROP TABLE IF EXISTS `problem_tags`;
+DROP TABLE IF EXISTS `problem_tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `problem_tags` (
+CREATE TABLE `problem_tag` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Id_Problem` int NOT NULL,
   `Id_Tag` int NOT NULL,
@@ -89,17 +90,18 @@ CREATE TABLE `problem_tags` (
   KEY `FK_PROBLEM_TAG_PROBLEM_idx` (`Id_Problem`),
   KEY `FK_PROBLEM_TAG_TAG_idx` (`Id_Tag`),
   CONSTRAINT `FK_PROBLEM_TAG_PROBLEM` FOREIGN KEY (`Id_Problem`) REFERENCES `problem` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_PROBLEM_TAG_TAG` FOREIGN KEY (`Id_Tag`) REFERENCES `tags` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  CONSTRAINT `FK_PROBLEM_TAG_TAG` FOREIGN KEY (`Id_Tag`) REFERENCES `tag` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `problem_tags`
+-- Dumping data for table `problem_tag`
 --
 
-LOCK TABLES `problem_tags` WRITE;
-/*!40000 ALTER TABLE `problem_tags` DISABLE KEYS */;
-/*!40000 ALTER TABLE `problem_tags` ENABLE KEYS */;
+LOCK TABLES `problem_tag` WRITE;
+/*!40000 ALTER TABLE `problem_tag` DISABLE KEYS */;
+INSERT INTO `problem_tag` VALUES (1,1,2),(2,1,3),(3,3,1),(4,2,1),(5,2,2);
+/*!40000 ALTER TABLE `problem_tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -131,26 +133,27 @@ LOCK TABLES `solution` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `tags`
+-- Table structure for table `tag`
 --
 
-DROP TABLE IF EXISTS `tags`;
+DROP TABLE IF EXISTS `tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tags` (
+CREATE TABLE `tag` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `tags`
+-- Dumping data for table `tag`
 --
 
-LOCK TABLES `tags` WRITE;
-/*!40000 ALTER TABLE `tags` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tags` ENABLE KEYS */;
+LOCK TABLES `tag` WRITE;
+/*!40000 ALTER TABLE `tag` DISABLE KEYS */;
+INSERT INTO `tag` VALUES (1,'analisis'),(2,'algebra'),(3,'tvm'),(4,'tcd'),(5,'integral');
+/*!40000 ALTER TABLE `tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -175,7 +178,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'almahill','b453eff019dfdb73916bf9dd48b780f8a7f15eb16fa118935b86f5790875e90e');
+INSERT INTO `users` VALUES (1,'almahill','6780304f9c37b51ab7e448f922dffcd3dc1889835b2cd26d0239f104d1e11d9f');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -188,4 +191,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-15 13:52:50
+-- Dump completed on 2020-04-16 12:41:37
