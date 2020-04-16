@@ -28,7 +28,9 @@ def getProblems(con, tags, mag, prop):
 				list_tags = tags.split(",")
 				tuple_values = tuple_values + tuple(list_tags)
 				for i in range(len(list_tags)):
-					if i == 0:
+					if len(list_tags)==1:
+						sqlQueryWhere = sqlQueryWhere + '(T.Name=%s) '
+					elif i == 0:
 						sqlQueryWhere = sqlQueryWhere + '(T.Name=%s '
 					elif i==len(list_tags)-1:
 						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s) '
@@ -54,7 +56,6 @@ def getProblems(con, tags, mag, prop):
 		problems_data = mycursor.fetchall()
 		json_data = []
 		for problem in problems_data:
-			print(problem)
 			json_data.append(
 				dict(zip(row_headers, [data if not isinstance(data,bytearray) else data.decode("utf-8") if counter != len(problem)-1 else data.decode("utf-8").split(",") for counter, data in enumerate(problem)])))
 			mycursor.close()
