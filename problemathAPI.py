@@ -9,7 +9,7 @@ from flask_restful import Resource, Api
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 import connections as cn
-import churnFunctions
+import problemathFunctions
 import json
 import re
 
@@ -89,7 +89,7 @@ class problemQuery(Resource):
 
             # Return the JSON created in the problemath library
 
-            return problemathFunctions.getProblems(con, tags, mag, prop)
+            return jsonify(problemathFunctions.getProblems(con, tags, mag, prop))
 
         except cn.sqlServerException as e:
             app.logger.exception('SQLServer Exception', e)
