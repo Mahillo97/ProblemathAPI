@@ -4,16 +4,17 @@
 * Date: 18/11/2019
 ****************************************************************************************************"""
 
-import connections as cn
+from connections import dbConnectMySQL
+from connections import mySQLException
 
 """****************************************************************************************************
 * Description: method to return a list of customers sensitive to leave the company in the next year
 * INPUT: -
-* OUTPUT: json object with a list of customers sensitive who might leave.
+* OUTPUT: dict object with a list of customers sensitive who might leave.
 ****************************************************************************************************"""
 
 
-def getProblems(con, tags, mag, prop):
+def getProblemList(con, tags, mag, prop):
 
 	try:
 		# Check tha variables to create the Query String
@@ -61,62 +62,59 @@ def getProblems(con, tags, mag, prop):
 			mycursor.close()
 			
 		return dict(problems=json_data)
-	except cn.mySqlException as e:
+	except mySQLException as e:
 		raise e
 
 """****************************************************************************************************
-* Description: method to return a churn prediction for one customer
-* INPUT: customer id that must be active
-* OUTPUT: a JSON with churn: [0,1] and score percentage of the prediction
+* Description: method to return the data of a problem
+* INPUT: problem_id is an integer
+* OUTPUT: a dict with the data of a 
 ****************************************************************************************************"""
-def getCustomerChurn(con, customer_id):
+def getProblem(con, problem_id):
 
-	# Select in the database the info for the selected customer
 	try:
-		sqlQuery = 'SELECT * FROM tblModelChurn WHERE sampleID='+str(customer_id)
-		dataClient = pd.read_sql(sqlQuery, con)
-		dataClient = dataClient.drop(['sampleID', 'activosFech1', 'activosFech2'], axis=1)
-
-		# Call churn model to execute prediction
-		with open('ModeloChurnPrediction/modelChurn.pkl', 'rb') as pickle_file:
-			model = pickle.load(pickle_file)
-		pred = model.predict_proba(dataClient)
-		score = pred[0][0]
-		if score>0.5:
-			churn = 0
+		# Check tha variables to create the Query String
+		sqlQuery = 'SELECT P.Id, P.Magazine, P.Tex, P.Proposer, P.Dep_State, P.URL_PDF_State, P.URL_PDF_Full, group_concat(distinct T.Name) as tags\
+					FROM problem as P join problem_tag as PT on P.Id=PT.Id_Problem JOIN tag as T on PT.Id_Tag=T.Id\
+					WHERE P.Id = %s\
+					GROUP BY P.Id, P.Magazine, P.Tex, P.Proposer, P.Dep_State, P.URL_PDF_State, P.URL_PDF_Full'
+		#Execute the query
+		mycursor = con.cursor(prepared=True)
+		mycursor.execute(sqlQuery, (problem_id,))
+		row_headers = [x[0].lower() for x in mycursor.description]
+		problem = mycursor.fetchone()
+		if(problem):
+			json_data = dict(zip(row_headers, [data if not isinstance(data,bytearray) else data.decode("utf-8") if counter != len(problem)-1 else data.decode("utf-8").split(",") for counter, data in enumerate(problem)]))
 		else:
-			churn = 1
-			score = pred[0][1]
+			json_data = None
 
-		return {'churn':churn,'score':float(score*100)}
-
-	except cn.sqlServerException as e:
+		mycursor.close()			
+		return json_data
+	except mySQLException as e:
 		raise e
-	except cn.mySqlException as err:
-		raise err
 
 """****************************************************************************************************
 * Description: method to say if a customer is active in the database
 * INPUT: customer id
 * OUTPUT: a boolean value: true if the customer is active in the database false in other cases
 ****************************************************************************************************"""
-def isCustomerActive(con, customer_id):
+def getProblemPDFState(con, problem_id):
 
-	isCustomer = False
-
-	# Select in the database the customer
 	try:
-		sqlQuery = 'SELECT * FROM tblDataClientChurn WHERE sampleID='+str(customer_id)
-		dataClient = pd.read_sql(sqlQuery, con)
-		if dataClient.shape[0]!=0 and dataClient.activosFech1[0] == 1:
-			isCustomer = True
+		# Check tha variables to create the Query String
+		sqlQuery = 'SELECT P.URL_PDF_State FROM problem as P WHERE P.Id = %s'
 
-	except cn.sqlServerException as e:
+		#Execute the query
+		mycursor = con.cursor(prepared=True)
+		mycursor.execute(sqlQuery, (problem_id,))
+		url = mycursor.fetchone()[0].decode("utf-8")
+		mycursor.close()
+
+		return url
+	except mySQLException as e:
 		raise e
-	except cn.mySqlException as err:
-		raise err
 
-	return isCustomer
+	
 
 """****************************************************************************************************
 * Description: method to return the current values of a client in the database
@@ -141,9 +139,9 @@ def getCustomerData(con, customer_id):
 
 		return dictClient
 
-	except cn.sqlServerException as e:
+	except sqlServerException as e:
 		raise e
-	except cn.mySqlException as err:
+	except mySQLException as err:
 		raise err
 
 """****************************************************************************************************
@@ -174,9 +172,9 @@ def getCustomerBills(con, customer_id):
 			ord_bill_list = sorted(list(bill_list), key=lambda k: k['IDFactura'], reverse=True)
 		return {'list': ord_bill_list}
 
-	except cn.sqlServerException as e:
+	except sqlServerException as e:
 		raise e
-	except cn.mySqlException as err:
+	except mySQLException as err:
 		raise err
 
 """****************************************************************************************************
@@ -207,7 +205,7 @@ def getCustomerServs(con, customer_id):
 			ord_serv_list = sorted(list(serv_list), key=lambda k: k['FAlta'], reverse=True)
 		return {'list': ord_serv_list}
 
-	except cn.sqlServerException as e:
+	except sqlServerException as e:
 		raise e
-	except cn.mySqlException as err:
+	except mySQLException as err:
 		raise err

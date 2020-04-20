@@ -4,16 +4,19 @@
 * Date: 15/4/2020
 ****************************************************************************************************"""
 
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request, abort, jsonify, make_response, send_from_directory
 from flask_restful import Resource, Api
 from flask_httpauth import HTTPBasicAuth
+from flask.logging import create_logger
 from werkzeug.security import generate_password_hash, check_password_hash
-import connections as cn
+from connections import dbConnectMySQL
+from connections import mySQLException
 import problemathFunctions
 import json
 import re
 
 app = Flask(__name__)
+log = create_logger(app)
 api = Api(app, prefix="/v1")
 auth = HTTPBasicAuth()
 
@@ -23,7 +26,6 @@ auth = HTTPBasicAuth()
 * OUTPUT: true if the users has api access
 ****************************************************************************************************"""
 
-
 @auth.verify_password
 def verify(username, password):
     verified = False
@@ -32,7 +34,7 @@ def verify(username, password):
     else:
         con = None
         try:
-            con = cn.dbConnectMySQL()
+            con = dbConnectMySQL()
             mycursor = con.cursor(prepared=True)
             sqlQuery = ' SELECT * FROM users WHERE username=%s and password=SHA2(%s,256) '
             mycursor.execute(sqlQuery, (username, password,))
@@ -40,13 +42,13 @@ def verify(username, password):
             mycursor.close()
             verified = (not (_password is None))
 
-        except cn.mySqlException as e:
+        except mySQLException as e:
             raise e
         finally:
             try:
                 if con is not None:
                     con.close()
-            except cn.mySqlException as eCon:
+            except mySQLException as eCon:
                 raise eCon
         return verified
 
@@ -72,37 +74,38 @@ class ping(Resource):
 ****************************************************************************************************"""
 
 
-class problemQuery(Resource):
+class problemQueryList(Resource):
 
     def get(self):
         # Select in the database to get the info for the problems
 
         con = None
         try:
-            con = cn.dbConnectMySQL()
+            con = dbConnectMySQL()
 
             # We get the parameters in the queryString
+            validParams = ['tags','mag','prop']
 
-            tags = request.args.get('tags')
-            mag = request.args.get('mag')
-            prop = request.args.get('proposer')
+            if(all(True if x in validParams else False for x in request.args.keys())):
+                tags = request.args.get('tags')
+                mag = request.args.get('mag')
+                prop = request.args.get('prop')
 
-            # Return the JSON created in the problemath library
+                # Return the JSON created in the problemath library
 
-            return jsonify(problemathFunctions.getProblems(con, tags, mag, prop))
+                return jsonify(problemathFunctions.getProblemList(con, tags, mag, prop))
+            else:
+                abort(400)
 
-        except cn.sqlServerException as e:
-            app.logger.exception('SQLServer Exception', e)
-            abort(500)
-        except cn.mySqlException as err:
-            app.logger.exception('mySQL Exception', err)
+        except mySQLException:
+            log.exception('mySQL Exception')
             abort(500)
         finally:
             try:
                 if(con is not None):
                     con.close()
-            except cn.sqlServerException as e2:
-                app.logger.exception('Unable to close connection', e2)
+            except mySQLException:
+                log.exception('Unable to close connection')
 
 
 """****************************************************************************************************
@@ -111,41 +114,30 @@ class problemQuery(Resource):
 * OUTPUT: a JSON with churn: [0,1] and score percentage of the prediction
 ****************************************************************************************************"""
 
+class problemQuery(Resource):
+    def get(self, problem_id):
 
-class getCustomerChurn(Resource):
-    # Authentication
-    @auth.login_required
-    def get(self, customer_id):
-        # Select in the database the info for the selected customer
-
+        # Select in the database the info for the selected problem
         con = None
         try:
+            # Check if problem_id is an int
+            problem_id = int(problem_id)
 
-            # Check if customer_id is an int
-            customer_id = int(customer_id)
-            con = cn.dbConnectSQLServer()
+            con = dbConnectMySQL()
+            data = problemathFunctions.getProblem(con, problem_id)
+            return jsonify(data) if data else abort(404)
 
-            # Check if the customer is in the database
-            if churnFunctions.isCustomerActive(con, customer_id):
-                # Return the JSON with the required data
-                return churnFunctions.getCustomerChurn(con, customer_id)
-            else:
-                abort(400)
-
-        except ValueError as ve:
+        except ValueError:
             abort(400)
-        except cn.sqlServerException as e:
-            app.logger.exception('SQLServer Exception', e)
-            abort(500)
-        except cn.mySqlException as err:
-            app.logger.exception('mySQL Exception', err)
+        except mySQLException:
+            log.exception('mySQL Exception')
             abort(500)
         finally:
             try:
                 if(con is not None):
                     con.close()
-            except cn.sqlServerException as e2:
-                app.logger.exception('Unable to close the connection', e2)
+            except mySQLException:
+                log.exception('Unable to close connection')
 
 
 """****************************************************************************************************
@@ -154,40 +146,31 @@ class getCustomerChurn(Resource):
 * OUTPUT: a JSON with the data client
 ****************************************************************************************************"""
 
+class problemPDFState(Resource):
+    def get(self, problem_id):
 
-class getCustomerData(Resource):
-    # Authentication
-    @auth.login_required
-    def get(self, customer_id):
-
+        # Select in the database the info for the selected problem
         con = None
         try:
+            # Check if problem_id is an int
+            problem_id = int(problem_id)
+            con = dbConnectMySQL()
+            urlPDF=problemathFunctions.getProblemPDFState(con, problem_id)
+            PDFName = urlPDF.split("/")[-1]
+            PDFDirectory = urlPDF[:urlPDF.rindex("/")]
+            return send_from_directory(PDFDirectory,PDFName)
 
-            # Check if customer_id is an int
-            customer_id = int(customer_id)
-            con = cn.dbConnectSQLServer()
-
-            # Check if the customer is in the database
-            if churnFunctions.isCustomerActive(con, customer_id):
-                # Return the JSON with the required data
-                return churnFunctions.getCustomerData(con, customer_id)
-            else:
-                abort(400)
-
-        except ValueError as ve:
+        except ValueError:
             abort(400)
-        except cn.sqlServerException as e:
-            app.logger.exception('SQLServer Exception', e)
-            abort(500)
-        except cn.mySqlException as err:
-            app.logger.exception('mySQL Exception', err)
+        except mySQLException:
+            log.exception('mySQL Exception')
             abort(500)
         finally:
             try:
                 if(con is not None):
                     con.close()
-            except cn.sqlServerException as e2:
-                app.logger.exception('Unable to close the connection', e2)
+            except mySQLException:
+                log.exception('Unable to close connection')
 
 
 """****************************************************************************************************
@@ -207,7 +190,7 @@ class getCustomerServs(Resource):
 
             # Check if customer_id is an int
             customer_id = int(customer_id)
-            con = cn.dbConnectSQLServer()
+            con = dbConnectSQLServer()
 
             # Check if the customer is in the database
             if churnFunctions.isCustomerActive(con, customer_id):
@@ -218,17 +201,17 @@ class getCustomerServs(Resource):
 
         except ValueError as ve:
             abort(400)
-        except cn.sqlServerException as e:
+        except sqlServerException as e:
             app.logger.exception('SQLServer Exception', e)
             abort(500)
-        except cn.mySqlException as err:
+        except mySQLException as err:
             app.logger.exception('mySQL Exception', err)
             abort(500)
         finally:
             try:
                 if(con is not None):
                     con.close()
-            except cn.sqlServerException as e2:
+            except sqlServerException as e2:
                 app.logger.exception('Unable to close the connection', e2)
 
 
@@ -249,7 +232,7 @@ class getCustomerBills(Resource):
 
             # Check if customer_id is an int
             customer_id = int(customer_id)
-            con = cn.dbConnectSQLServer()
+            con = dbConnectSQLServer()
 
             # Check if the customer is in the database
             if churnFunctions.isCustomerActive(con, customer_id):
@@ -260,17 +243,17 @@ class getCustomerBills(Resource):
 
         except ValueError as ve:
             abort(400)
-        except cn.sqlServerException as e:
+        except sqlServerException as e:
             app.logger.exception('SQLServer Exception', e)
             abort(500)
-        except cn.mySqlException as err:
+        except mySQLException as err:
             app.logger.exception('mySQL Exception', err)
             abort(500)
         finally:
             try:
                 if(con is not None):
                     con.close()
-            except cn.sqlServerException as e2:
+            except sqlServerException as e2:
                 app.logger.exception('Unable to close the connection', e2)
 
 
@@ -302,7 +285,7 @@ class userManagement(Resource):
         # Create the connection
         con = None
         try:
-            conexion = cn.dbConnectMySQL()
+            conexion = dbConnectMySQL()
             mycursor = conexion.cursor()
 
             # Validate admin permisions for the user
@@ -338,20 +321,20 @@ class userManagement(Resource):
                 abort(401)
             mycursor.close()
 
-        except cn.mySqlException as e:
+        except mySQLException as e:
             try:
                 if not (con is None):
                     con.rollback()
                 app.logger.exception('mySQL Exception', e)
                 abort(500)
-            except cn.mySqlException as eRoll:
+            except mySQLException as eRoll:
                 app.logger.exception('mySQL Exception', e)
                 abort(500)
         finally:
             try:
                 if not (con is None):
                     con.close()
-            except mySqlException as eCon:
+            except mySQLException as eCon:
                 app.logger.exception(
                     'Unable to close connection to the database', e2)
 
@@ -370,7 +353,7 @@ class test(Resource):
         # Create the connection
         con = None
         try:
-            conexion = cn.dbConnectMySQL()
+            conexion = dbConnectMySQL()
             mycursor = conexion.cursor(prepared=True)
             sqlQuery = 'SELECT username FROM users WHERE username=%s'
             mycursor.execute(sqlQuery, ("almahill",))
@@ -384,20 +367,20 @@ class test(Resource):
 
             return jsonify(dict(users=json_data))
 
-        except cn.mySqlException as e:
+        except mySQLException as e:
             try:
                 if not (con is None):
                     con.rollback()
                 app.logger.exception('mySQL Exception', e)
                 abort(500)
-            except cn.mySqlException as eRoll:
+            except mySQLException as eRoll:
                 app.logger.exception('mySQL Exception', e)
                 abort(500)
         finally:
             try:
                 if not (con is None):
                     con.close()
-            except mySqlException as eCon:
+            except mySQLException as eCon:
                 app.logger.exception(
                     'Unable to close connection to the database', e2)
 
@@ -405,9 +388,10 @@ class test(Resource):
 """****************************************************************************************************
 * Methods definition
 ****************************************************************************************************"""
-api.add_resource(problemQuery, '/users/problems')
-api.add_resource(getCustomerChurn, '/customers/churn/<customer_id>')
-api.add_resource(getCustomerData, '/customers/<customer_id>')
+api.add_resource(problemQueryList, '/users/problems')
+api.add_resource(problemQuery, '/users/problem/<problem_id>')
+api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
+#api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
 api.add_resource(getCustomerServs, '/customers/servs/<customer_id>')
 api.add_resource(getCustomerBills, '/customers/bills/<customer_id>')
 api.add_resource(userManagement, '/users')
