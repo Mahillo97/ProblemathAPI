@@ -4,18 +4,24 @@
 * Date: 15/4/2020
 ****************************************************************************************************"""
 
-from flask import Flask, request, abort, jsonify, make_response, send_from_directory
+from flask import Flask, request, abort, jsonify, make_response, send_from_directory, url_for
 from flask_restful import Resource, Api
 from flask_httpauth import HTTPBasicAuth
 from flask.logging import create_logger
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from connections import dbConnectMySQL
 from connections import mySQLException
 import problemathFunctions
 import json
 import re
+import os
+
+UPLOAD_FOLDER = '/home/almahill/ProblemathAPIData/tmp'
+ALLOWED_EXTENSIONS = {'tex'}
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 log = create_logger(app)
 api = Api(app, prefix="/v1")
 auth = HTTPBasicAuth()
@@ -25,6 +31,7 @@ auth = HTTPBasicAuth()
 * INUT: username and password
 * OUTPUT: true if the users has api access
 ****************************************************************************************************"""
+
 
 @auth.verify_password
 def verify(username, password):
@@ -84,7 +91,7 @@ class problemQueryList(Resource):
             con = dbConnectMySQL()
 
             # We get the parameters in the queryString
-            validParams = ['tags','mag','prop']
+            validParams = ['tags', 'mag', 'prop']
 
             if(all(True if x in validParams else False for x in request.args.keys())):
                 tags = request.args.get('tags')
@@ -113,6 +120,7 @@ class problemQueryList(Resource):
 * INPUT: customer id
 * OUTPUT: a JSON with churn: [0,1] and score percentage of the prediction
 ****************************************************************************************************"""
+
 
 class problemQuery(Resource):
     def get(self, problem_id):
@@ -146,6 +154,7 @@ class problemQuery(Resource):
 * OUTPUT: a JSON with the data client
 ****************************************************************************************************"""
 
+
 class problemPDFState(Resource):
     def get(self, problem_id):
 
@@ -155,10 +164,10 @@ class problemPDFState(Resource):
             # Check if problem_id is an int
             problem_id = int(problem_id)
             con = dbConnectMySQL()
-            urlPDF=problemathFunctions.getProblemPDFState(con, problem_id)
+            urlPDF = problemathFunctions.getProblemPDFState(con, problem_id)
             PDFName = urlPDF.split("/")[-1]
             PDFDirectory = urlPDF[:urlPDF.rindex("/")]
-            return send_from_directory(PDFDirectory,PDFName)
+            return send_from_directory(PDFDirectory, PDFName)
 
         except ValueError:
             abort(400)
@@ -180,39 +189,31 @@ class problemPDFState(Resource):
 ****************************************************************************************************"""
 
 
-class getCustomerServs(Resource):
-    # Authentication
-    @auth.login_required
-    def get(self, customer_id):
+class problemPDFFull(Resource):
+    def get(self, problem_id):
 
+        # Select in the database the info for the selected problem
         con = None
         try:
+            # Check if problem_id is an int
+            problem_id = int(problem_id)
+            con = dbConnectMySQL()
+            urlPDF = problemathFunctions.getProblemPDFFull(con, problem_id)
+            PDFName = urlPDF.split("/")[-1]
+            PDFDirectory = urlPDF[:urlPDF.rindex("/")]
+            return send_from_directory(PDFDirectory, PDFName)
 
-            # Check if customer_id is an int
-            customer_id = int(customer_id)
-            con = dbConnectSQLServer()
-
-            # Check if the customer is in the database
-            if churnFunctions.isCustomerActive(con, customer_id):
-                # Return the JSON with the required data
-                return churnFunctions.getCustomerServs(con, customer_id)
-            else:
-                abort(400)
-
-        except ValueError as ve:
+        except ValueError:
             abort(400)
-        except sqlServerException as e:
-            app.logger.exception('SQLServer Exception', e)
-            abort(500)
-        except mySQLException as err:
-            app.logger.exception('mySQL Exception', err)
+        except mySQLException:
+            log.exception('mySQL Exception')
             abort(500)
         finally:
             try:
                 if(con is not None):
                     con.close()
-            except sqlServerException as e2:
-                app.logger.exception('Unable to close the connection', e2)
+            except mySQLException:
+                log.exception('Unable to close connection')
 
 
 """****************************************************************************************************
@@ -222,40 +223,56 @@ class getCustomerServs(Resource):
 ****************************************************************************************************"""
 
 
-class getCustomerBills(Resource):
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+class uploadProblem(Resource):
     # Authentication
     @auth.login_required
-    def get(self, customer_id):
+    def post(self):
 
+        # Create the connection to upload the problem
         con = None
         try:
+            con = dbConnectMySQL('admin')
+            # We get the parameters in the queryString
+            validParams = ['file', 'tags', 'mag', 'prop']
 
-            # Check if customer_id is an int
-            customer_id = int(customer_id)
-            con = dbConnectSQLServer()
+            if(all(True if x in validParams else False for x in request.args.keys())):
 
-            # Check if the customer is in the database
-            if churnFunctions.isCustomerActive(con, customer_id):
-                # Return the JSON with the required data
-                return churnFunctions.getCustomerBills(con, customer_id)
+                # check if the post request has the file part
+                if 'file'  in request.files and request.files['file'].filename == '':
+                    file = request.files['file']
+
+                    if file and allowed_file(file.filename):
+                        filename = secure_filename(file.filename)
+                        absoluteURL = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                        file.save(absoluteURL)
+
+                        # Now we get the rest of params
+                        tags = request.args.get('tags')
+                        mag = request.args.get('mag')
+                        prop = request.args.get('prop')
+
+                        problemathFunctions.saveProblemDB(con, absoluteURL, tags, mag, prop)
+
+                        os.remove(absoluteURL)
+
+                        pass
             else:
                 abort(400)
 
-        except ValueError as ve:
-            abort(400)
-        except sqlServerException as e:
-            app.logger.exception('SQLServer Exception', e)
-            abort(500)
-        except mySQLException as err:
-            app.logger.exception('mySQL Exception', err)
+        except mySQLException:
+            log.exception('mySQL Exception')
             abort(500)
         finally:
             try:
                 if(con is not None):
                     con.close()
-            except sqlServerException as e2:
-                app.logger.exception('Unable to close the connection', e2)
-
+            except mySQLException:
+                log.exception('Unable to close connection')
 
 """****************************************************************************************************
 * Description: allow to create users for the API
@@ -391,8 +408,7 @@ class test(Resource):
 api.add_resource(problemQueryList, '/users/problems')
 api.add_resource(problemQuery, '/users/problem/<problem_id>')
 api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
-#api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
-api.add_resource(getCustomerServs, '/customers/servs/<customer_id>')
+api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
 api.add_resource(getCustomerBills, '/customers/bills/<customer_id>')
 api.add_resource(userManagement, '/users')
 api.add_resource(ping, '/ping')

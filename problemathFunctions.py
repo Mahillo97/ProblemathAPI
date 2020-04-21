@@ -121,61 +121,76 @@ def getProblemPDFState(con, problem_id):
 * INPUT: customer id
 * OUTPUT: a JSON with the data client
 ****************************************************************************************************"""
-def getCustomerData(con, customer_id):
-
-	# Select in the database the info for the selected customer
+def getProblemPDFFull(con, problem_id):
 
 	try:
-		sqlQuery = 'SELECT * FROM tblDataClientChurn WHERE sampleID='+str(customer_id)
-		dataClient = pd.read_sql(sqlQuery, con)
+		# Check tha variables to create the Query String
+		sqlQuery = 'SELECT P.URL_PDF_Full FROM problem as P WHERE P.Id = %s'
 
-		# Return the client data
-		dictClient = dict()
-		for value, column in zip(dataClient.values[0],dataClient.columns):
-			if column == "sampleID":
-				dictClient["ID"] = value
-			else:
-				dictClient[column] = value
+		#Execute the query
+		mycursor = con.cursor(prepared=True)
+		mycursor.execute(sqlQuery, (problem_id,))
+		url = mycursor.fetchone()[0].decode("utf-8")
+		mycursor.close()
 
-		return dictClient
-
-	except sqlServerException as e:
+		return url
+	except mySQLException as e:
 		raise e
-	except mySQLException as err:
-		raise err
 
 """****************************************************************************************************
 * Description: method to return the bills of a client
 * INPUT: customer id
 * OUTPUT: a JSON with the data client
 ****************************************************************************************************"""
-def getCustomerBills(con, customer_id):
-
-	# Select in the database the info for the selected customer
+def saveProblemDB(con, absoluteURL, tags, mag, prop):
 
 	try:
-		sqlQuery = 'SELECT * FROM tblFacturas where IDCliente =' + str(customer_id)
-		billsClient = pd.read_sql(sqlQuery, con)
+		# Check tha variables to create the Query String
+		sqlQueryBeginning = 'INSERT INTO problem (Tex,URL_PDF_State,URL_PDF_State'
+		sqlQuerycolumns = ''
+		sqlQueryValues= 'VALUES'
+		tuple_values=()
+		if(tags or mag or prop):
+			sqlQueryWhere = 'WHERE '
+			if(tags):
+				list_tags = tags.split(",")
+				tuple_values = tuple_values + tuple(list_tags)
+				for i in range(len(list_tags)):
+					if len(list_tags)==1:
+						sqlQueryWhere = sqlQueryWhere + '(T.Name=%s) '
+					elif i == 0:
+						sqlQueryWhere = sqlQueryWhere + '(T.Name=%s '
+					elif i==len(list_tags)-1:
+						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s) '
+					else:
+						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s '
+			if(mag):
+				if(tags):
+					sqlQueryWhere = sqlQueryWhere + 'and '
+				tuple_values = tuple_values + (mag,)
+				sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
+			if(prop):
+				if(mag or tags):
+					sqlQueryWhere = sqlQueryWhere + 'and '
+				tuple_values = tuple_values + (prop,)
+				sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
 
-		# Return the client bills
-		bill_list = []
-		for index, bill in billsClient.iterrows():
-			dictBill = dict()
-			for value, column in zip(bill.values,billsClient.columns):
-				if column == "IDClient":
-					dictBill["ID"] = value
-				elif type(value).__name__ == "Timestamp":
-					dictBill[column] = str(value)
-				else:
-					dictBill[column] = value
-			bill_list = np.append(bill_list,dictBill)
-			ord_bill_list = sorted(list(bill_list), key=lambda k: k['IDFactura'], reverse=True)
-		return {'list': ord_bill_list}
-
-	except sqlServerException as e:
+		sqlQuery = sqlQueryBeginning + sqlQueryWhere + sqlQueryEnd
+		
+		#Execute the query
+		mycursor = con.cursor(prepared=True)
+		mycursor.execute(sqlQuery, tuple_values)
+		row_headers = [x[0].lower() for x in mycursor.description]
+		problems_data = mycursor.fetchall()
+		json_data = []
+		for problem in problems_data:
+			json_data.append(
+				dict(zip(row_headers, [data if not isinstance(data,bytearray) else data.decode("utf-8") if counter != len(problem)-1 else data.decode("utf-8").split(",") for counter, data in enumerate(problem)])))
+			mycursor.close()
+			
+		return dict(problems=json_data)
+	except mySQLException as e:
 		raise e
-	except mySQLException as err:
-		raise err
 
 """****************************************************************************************************
 * Description: method to return the active services of a client
