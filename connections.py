@@ -25,6 +25,6 @@ def dbConnectMySQL(user=None,pwd=None):
 			user = str(config.get('MySQLDatabase-User','User'))
 			pwd = str(config.get('MySQLDatabase-User','Password'))
 
-		return mySQLConnect(host = server, database = db, user = user, password = pwd)
+		return mySQLConnect(host = server, database = db, user = user, password = pwd, autocommit=True)
 	except mySQLException as e:
 		raise e

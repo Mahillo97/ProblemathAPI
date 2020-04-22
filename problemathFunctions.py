@@ -6,6 +6,10 @@
 
 from connections import dbConnectMySQL
 from connections import mySQLException
+import os
+
+UPLOAD_FOLDER = 'Data/tmp'
+DATA_DIRECTORY = 'Data'
 
 """****************************************************************************************************
 * Description: method to return a list of customers sensitive to leave the company in the next year
@@ -145,82 +149,86 @@ def getProblemPDFFull(con, problem_id):
 def saveProblemDB(con, absoluteURL, tags, mag, prop):
 
 	try:
+		con.start_transaction()
+
 		# Check tha variables to create the Query String
-		sqlQueryBeginning = 'INSERT INTO problem (Tex,URL_PDF_State,URL_PDF_State'
-		sqlQuerycolumns = ''
-		sqlQueryValues= 'VALUES'
-		tuple_values=()
-		if(tags or mag or prop):
-			sqlQueryWhere = 'WHERE '
-			if(tags):
-				list_tags = tags.split(",")
-				tuple_values = tuple_values + tuple(list_tags)
-				for i in range(len(list_tags)):
-					if len(list_tags)==1:
-						sqlQueryWhere = sqlQueryWhere + '(T.Name=%s) '
-					elif i == 0:
-						sqlQueryWhere = sqlQueryWhere + '(T.Name=%s '
-					elif i==len(list_tags)-1:
-						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s) '
-					else:
-						sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s '
-			if(mag):
-				if(tags):
-					sqlQueryWhere = sqlQueryWhere + 'and '
-				tuple_values = tuple_values + (mag,)
-				sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
-			if(prop):
-				if(mag or tags):
-					sqlQueryWhere = sqlQueryWhere + 'and '
-				tuple_values = tuple_values + (prop,)
-				sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
+		sqlQueryBeginningProblem = 'INSERT INTO problem (Tex, URL_PDF_State, URL_PDF_Full, Dep_State'
+		sqlQueryValuesProblem= 'VALUES (%s, %s, %s, %s'
+		tupleValuesProblem=()
 
-		sqlQuery = sqlQueryBeginning + sqlQueryWhere + sqlQueryEnd
-		
+		#We read the file
+		file = open(absoluteURL,"r")
+		tex = file.read()
+		file.close()
+
+		tupleValuesProblem = tupleValuesProblem + (tex,'placeholder','placeholder',0)
+
+		if(mag):
+			sqlQueryBeginningProblem = sqlQueryBeginningProblem + ', Magazine'
+			sqlQueryValuesProblem = sqlQueryValuesProblem + ', %s'
+			tupleValuesProblem = tupleValuesProblem + (mag,)
+		if(prop):
+			sqlQueryBeginningProblem = sqlQueryBeginningProblem + ', Proposer'
+			sqlQueryValuesProblem = sqlQueryValuesProblem + ', %s'
+			tupleValuesProblem = tupleValuesProblem + (prop,)
+
+		sqlQueryBeginningProblem = sqlQueryBeginningProblem + ') '
+		sqlQueryValuesProblem = sqlQueryValuesProblem + ')'
+
+		sqlQueryProblem = sqlQueryBeginningProblem + sqlQueryValuesProblem
+
 		#Execute the query
-		mycursor = con.cursor(prepared=True)
-		mycursor.execute(sqlQuery, tuple_values)
-		row_headers = [x[0].lower() for x in mycursor.description]
-		problems_data = mycursor.fetchall()
-		json_data = []
-		for problem in problems_data:
-			json_data.append(
-				dict(zip(row_headers, [data if not isinstance(data,bytearray) else data.decode("utf-8") if counter != len(problem)-1 else data.decode("utf-8").split(",") for counter, data in enumerate(problem)])))
-			mycursor.close()
-			
-		return dict(problems=json_data)
-	except mySQLException as e:
-		raise e
+		mycursorProblem = con.cursor(prepared=True)
+		mycursorProblem.execute(sqlQueryProblem, tupleValuesProblem)
+		idProblem = mycursorProblem.lastrowid
+		mycursorProblem.close()
 
-"""****************************************************************************************************
-* Description: method to return the active services of a client
-* INPUT: customer id
-* OUTPUT: a JSON with the active services of a client
-****************************************************************************************************"""
-def getCustomerServs(con, customer_id):
+		#We update the placeholders
+		mycursorUpdate= con.cursor(prepared=True)
+		sqlQueryUpdate = 'UPDATE problem SET URL_PDF_State=%s, URL_PDF_Full=%s WHERE id=%s'
+		URL_PDF_State = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfState.pdf'
+		URL_PDF_Full = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfFull.pdf'
+		tupleValuesUpdate = (URL_PDF_State,URL_PDF_Full,idProblem)
+		mycursorUpdate.execute(sqlQueryUpdate, tupleValuesUpdate)
+		mycursorUpdate.close()
 
-	# Select in the database the info for the selected customer
+		#We add the tags to the database
+		mycursorFindTag= con.cursor(prepared=True)
+		mycursorNewTag= con.cursor(prepared=True)
+		mycursorTags= con.cursor(prepared=True)
 
-	try:
-		sqlQuery = 'SELECT * FROM tblServicios where IDCliente =' + str(customer_id) + '  and Estado = \'ACTIVO\''
-		servsClient = pd.read_sql(sqlQuery, con)
-
-		# Return the client bills
-		serv_list = []
-		for index, serv in servsClient.iterrows():
-			dictServ = dict()
-			for value, column in zip(serv.values,servsClient.columns):
-				if column == "IDClient":
-					dictServ["ID"] = value
-				elif type(value).__name__ == "Timestamp":
-					dictServ[column] = str(value)
+		if(tags):
+			list_tags = tags.split(",")
+			sqlQueryFindTag = 'SELECT Id FROM tag WHERE Name = %s '
+			sqlQueryNewTags = 'INSERT INTO tag (Name) VALUES (%s)'
+			sqlQueryTags = 'INSERT INTO problem_tag (Id_Problem,Id_Tag) VALUES (%s,%s)'
+			for tag in list_tags:
+				idTag = None
+				mycursorFindTag.execute(sqlQueryFindTag,(tag,))
+				row = mycursorFindTag.fetchone()
+				if row is None:
+					mycursorNewTag.execute(sqlQueryNewTags,(tag,))
+					idTag= mycursorNewTag.lastrowid
 				else:
-					dictServ[column] = value
-			serv_list = np.append(serv_list,dictServ)
-			ord_serv_list = sorted(list(serv_list), key=lambda k: k['FAlta'], reverse=True)
-		return {'list': ord_serv_list}
+					idTag=row[0]		
+				mycursorTags.execute(sqlQueryTags,(idProblem,idTag))
+		
+		mycursorFindTag.close()
+		mycursorNewTag.close()
+		mycursorTags.close()
 
-	except sqlServerException as e:
+		#We commit the changes
+		con.commit()
+
+		#Now we compile de problem
+		cliMakeDir = 'mkdir '+ DATA_DIRECTORY+'/'+str(idProblem)
+		cliCompile = 'laton  -o '+ URL_PDF_State + ' ' + absoluteURL 
+		print(cliCompile)
+		os.system(cliMakeDir)
+		os.system(cliCompile)
+
+
+		return True
+	except mySQLException as e:
+		con.rollback()
 		raise e
-	except mySQLException as err:
-		raise err

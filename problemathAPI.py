@@ -17,7 +17,7 @@ import json
 import re
 import os
 
-UPLOAD_FOLDER = '/home/almahill/ProblemathAPIData/tmp'
+UPLOAD_FOLDER = 'Data/tmp'
 ALLOWED_EXTENSIONS = {'tex'}
 
 app = Flask(__name__)
@@ -224,8 +224,7 @@ class problemPDFFull(Resource):
 
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 class uploadProblem(Resource):
@@ -241,28 +240,27 @@ class uploadProblem(Resource):
             validParams = ['file', 'tags', 'mag', 'prop']
 
             if(all(True if x in validParams else False for x in request.args.keys())):
-
+                
                 # check if the post request has the file part
-                if 'file'  in request.files and request.files['file'].filename == '':
+                if 'file' in request.files and request.files['file'].filename != '':
                     file = request.files['file']
-
                     if file and allowed_file(file.filename):
                         filename = secure_filename(file.filename)
                         absoluteURL = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                         file.save(absoluteURL)
 
                         # Now we get the rest of params
-                        tags = request.args.get('tags')
-                        mag = request.args.get('mag')
-                        prop = request.args.get('prop')
+                        tags = request.form.get('tags')
+                        mag = request.form.get('mag')
+                        prop = request.form.get('prop')
 
                         problemathFunctions.saveProblemDB(con, absoluteURL, tags, mag, prop)
 
                         os.remove(absoluteURL)
 
-                        pass
-            else:
-                abort(400)
+                        return None
+            
+            abort(400)
 
         except mySQLException:
             log.exception('mySQL Exception')
@@ -409,7 +407,7 @@ api.add_resource(problemQueryList, '/users/problems')
 api.add_resource(problemQuery, '/users/problem/<problem_id>')
 api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
 api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
-api.add_resource(getCustomerBills, '/customers/bills/<customer_id>')
+api.add_resource(uploadProblem, '/admin/uploadProblem')
 api.add_resource(userManagement, '/users')
 api.add_resource(ping, '/ping')
 api.add_resource(test, '/test')
