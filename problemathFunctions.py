@@ -6,6 +6,7 @@
 
 from connections import dbConnectMySQL
 from connections import mySQLException
+import saveProblemDB
 import os
 
 UPLOAD_FOLDER = 'Data/tmp'
@@ -146,89 +147,57 @@ def getProblemPDFFull(con, problem_id):
 * INPUT: customer id
 * OUTPUT: a JSON with the data client
 ****************************************************************************************************"""
-def saveProblemDB(con, absoluteURL, tags, mag, prop):
+def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 
 	try:
-		con.start_transaction()
 
-		# Check tha variables to create the Query String
-		sqlQueryBeginningProblem = 'INSERT INTO problem (Tex, URL_PDF_State, URL_PDF_Full, Dep_State'
-		sqlQueryValuesProblem= 'VALUES (%s, %s, %s, %s'
-		tupleValuesProblem=()
+		#We save the statement
+		dictSavedStatement = saveProblemDB.saveStatementDB(con, absoluteURL, tags, mag, prop)
 
-		#We read the file
-		file = open(absoluteURL,"r")
-		tex = file.read()
-		file.close()
+		if dictSavedStatement:
+			listDictSavedSolu = []
+			for solutionDict in solutionsData:
+				listDictSavedSolu.append(saveProblemDB.saveSolutionDB(con, solutionDict['solutionURL'], str(dictSavedStatement['idProblem']),solutionDict['solver']))
+			
+			if listDictSavedSolu:
 
-		tupleValuesProblem = tupleValuesProblem + (tex,'placeholder','placeholder',0)
+				#We create the directory
+				cliMakeDir = 'mkdir '+ DATA_DIRECTORY+'/'+str(dictSavedStatement['idProblem'])
+				os.system(cliMakeDir)
 
-		if(mag):
-			sqlQueryBeginningProblem = sqlQueryBeginningProblem + ', Magazine'
-			sqlQueryValuesProblem = sqlQueryValuesProblem + ', %s'
-			tupleValuesProblem = tupleValuesProblem + (mag,)
-		if(prop):
-			sqlQueryBeginningProblem = sqlQueryBeginningProblem + ', Proposer'
-			sqlQueryValuesProblem = sqlQueryValuesProblem + ', %s'
-			tupleValuesProblem = tupleValuesProblem + (prop,)
+				#Now we compile just the statement	
+				cliCompile = 'laton  -o '+ dictSavedStatement['URL_PDF_State'] + ' ' + absoluteURL 			
+				os.system(cliCompile)
 
-		sqlQueryBeginningProblem = sqlQueryBeginningProblem + ') '
-		sqlQueryValuesProblem = sqlQueryValuesProblem + ')'
+				#Now we compile the statement with the solutions
+				#For that we must create a new tex
+				urlNewTex = dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + '.tex'
+				statementTex = dictSavedStatement['texProblem']
+				newTexFile = open(urlNewTex,"w+")			
+				newTexFile.write(statementTex[:statementTex.find('\\end{document}')]+'\n')
 
-		sqlQueryProblem = sqlQueryBeginningProblem + sqlQueryValuesProblem
+				#We write each solution
+				for counter, DictSavedSolu in enumerate(listDictSavedSolu):
+					solutionTex = DictSavedSolu['texSolu']
+					newTexFile.write('\\textbf{Solution '+ str(counter) +'}\\\\\n')
+					newTexFile.write(solutionTex)
 
-		#Execute the query
-		mycursorProblem = con.cursor(prepared=True)
-		mycursorProblem.execute(sqlQueryProblem, tupleValuesProblem)
-		idProblem = mycursorProblem.lastrowid
-		mycursorProblem.close()
+				#We end the document
+				newTexFile.write('\\end{document}')
+				newTexFile.flush()
+				newTexFile.close()
 
-		#We update the placeholders
-		mycursorUpdate= con.cursor(prepared=True)
-		sqlQueryUpdate = 'UPDATE problem SET URL_PDF_State=%s, URL_PDF_Full=%s WHERE id=%s'
-		URL_PDF_State = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfState.pdf'
-		URL_PDF_Full = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfFull.pdf'
-		tupleValuesUpdate = (URL_PDF_State,URL_PDF_Full,idProblem)
-		mycursorUpdate.execute(sqlQueryUpdate, tupleValuesUpdate)
-		mycursorUpdate.close()
+				#We compile the new .tex
 
-		#We add the tags to the database
-		mycursorFindTag= con.cursor(prepared=True)
-		mycursorNewTag= con.cursor(prepared=True)
-		mycursorTags= con.cursor(prepared=True)
+				cliCompile = 'laton -o '+ dictSavedStatement['URL_PDF_Full'] + ' '+ urlNewTex 
+				os.system(cliCompile)
 
-		if(tags):
-			list_tags = tags.split(",")
-			sqlQueryFindTag = 'SELECT Id FROM tag WHERE Name = %s '
-			sqlQueryNewTags = 'INSERT INTO tag (Name) VALUES (%s)'
-			sqlQueryTags = 'INSERT INTO problem_tag (Id_Problem,Id_Tag) VALUES (%s,%s)'
-			for tag in list_tags:
-				idTag = None
-				mycursorFindTag.execute(sqlQueryFindTag,(tag,))
-				row = mycursorFindTag.fetchone()
-				if row is None:
-					mycursorNewTag.execute(sqlQueryNewTags,(tag,))
-					idTag= mycursorNewTag.lastrowid
-				else:
-					idTag=row[0]		
-				mycursorTags.execute(sqlQueryTags,(idProblem,idTag))
-		
-		mycursorFindTag.close()
-		mycursorNewTag.close()
-		mycursorTags.close()
+				#We delete the aux .tex
+				rmAuxTex = 'rm ' + urlNewTex 
+				os.system(rmAuxTex)
+				return True
 
-		#We commit the changes
-		con.commit()
-
-		#Now we compile de problem
-		cliMakeDir = 'mkdir '+ DATA_DIRECTORY+'/'+str(idProblem)
-		cliCompile = 'laton  -o '+ URL_PDF_State + ' ' + absoluteURL 
-		print(cliCompile)
-		os.system(cliMakeDir)
-		os.system(cliCompile)
-
-
-		return True
+		return False
 	except mySQLException as e:
 		con.rollback()
 		raise e

@@ -167,6 +167,9 @@ class problemPDFState(Resource):
             urlPDF = problemathFunctions.getProblemPDFState(con, problem_id)
             PDFName = urlPDF.split("/")[-1]
             PDFDirectory = urlPDF[:urlPDF.rindex("/")]
+            print(urlPDF)
+            print(PDFName)
+            print(PDFDirectory)
             return send_from_directory(PDFDirectory, PDFName)
 
         except ValueError:
@@ -199,8 +202,11 @@ class problemPDFFull(Resource):
             problem_id = int(problem_id)
             con = dbConnectMySQL()
             urlPDF = problemathFunctions.getProblemPDFFull(con, problem_id)
+            print(urlPDF)
             PDFName = urlPDF.split("/")[-1]
+            print(PDFName)
             PDFDirectory = urlPDF[:urlPDF.rindex("/")]
+            print(PDFDirectory)
             return send_from_directory(PDFDirectory, PDFName)
 
         except ValueError:
@@ -237,26 +243,43 @@ class uploadProblem(Resource):
         try:
             con = dbConnectMySQL('admin')
             # We get the parameters in the queryString
-            validParams = ['file', 'tags', 'mag', 'prop']
+            validParams = ['problem','tags', 'mag', 'prop']
 
-            if(all(True if x in validParams else False for x in request.args.keys())):
-                
-                # check if the post request has the file part
-                if 'file' in request.files and request.files['file'].filename != '':
-                    file = request.files['file']
-                    if file and allowed_file(file.filename):
-                        filename = secure_filename(file.filename)
+            if(all(True if x in validParams else True if (re.match('solution[1-9]?',x) or re.match('solver[1-9]?',x)) else False for x in list(request.args.keys())+list(request.form.keys()))):
+                # check if the post request has the problem part and at least one solution
+                if 'problem' in request.files and request.files['problem'].filename != '' and 'solution1' in request.files and request.files['solution1'].filename != '':
+                    problem = request.files['problem']    
+                    if problem and allowed_file(problem.filename): 
+                        filename = secure_filename(problem.filename)
                         absoluteURL = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                        file.save(absoluteURL)
+                        problem.save(absoluteURL)
+
+                        solutionsData = []
+
+                        for param, solution in request.files.items():
+                            numberSolu = param[param.find('solution') + len('solution'):]
+                            if re.match('solution[1-9]?',param):
+                                if solution and allowed_file(solution.filename):
+                                    solver = request.form.get('solver' + str(numberSolu))
+                                    filename = secure_filename(solution.filename)
+                                    absoluteURLAux = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                                    solutionsData.append(dict(solutionURL=absoluteURLAux,solver=solver))
+                                    solution.save(absoluteURLAux)
+                                else:
+                                    abort(400)
 
                         # Now we get the rest of params
                         tags = request.form.get('tags')
                         mag = request.form.get('mag')
                         prop = request.form.get('prop')
 
-                        problemathFunctions.saveProblemDB(con, absoluteURL, tags, mag, prop)
+                        problemathFunctions.saveProblem(con, absoluteURL, solutionsData, tags, mag, prop)
+
+                        for solution in solutionsData:
+                            os.remove(solution['solutionURL'])
 
                         os.remove(absoluteURL)
+
 
                         return None
             
