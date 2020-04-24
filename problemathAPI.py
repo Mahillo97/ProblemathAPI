@@ -16,9 +16,10 @@ import problemathFunctions
 import json
 import re
 import os
+import time
 
 UPLOAD_FOLDER = 'Data/tmp'
-ALLOWED_EXTENSIONS = {'tex'}
+ALLOWED_EXTENSIONS = {'tex','zip'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -261,7 +262,8 @@ class uploadProblem(Resource):
                             if re.match('solution[1-9]?',param):
                                 if solution and allowed_file(solution.filename):
                                     solver = request.form.get('solver' + str(numberSolu))
-                                    filename = secure_filename(solution.filename)
+                                    timeStampMark = str('{:2f}'.format(time.time()*100000000)).split('.')[0]
+                                    filename = timeStampMark + secure_filename(solution.filename)
                                     absoluteURLAux = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                                     solutionsData.append(dict(solutionURL=absoluteURLAux,solver=solver))
                                     solution.save(absoluteURLAux)
