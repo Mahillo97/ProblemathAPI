@@ -251,7 +251,8 @@ class uploadProblem(Resource):
                 if 'problem' in request.files and request.files['problem'].filename != '' and 'solution1' in request.files and request.files['solution1'].filename != '':
                     problem = request.files['problem']    
                     if problem and allowed_file(problem.filename): 
-                        filename = secure_filename(problem.filename)
+                        timeStampMark = str('{:2f}'.format(time.time()*100000000)).split('.')[0]
+                        filename = timeStampMark + secure_filename(problem.filename)
                         absoluteURL = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                         problem.save(absoluteURL)
 

@@ -151,6 +151,8 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 
 	try:
 
+		con.start_transaction()
+
 		#We save the statement
 		dictSavedStatement = saveProblemDB.saveStatementDB(con, absoluteURL, tags, mag, prop)
 
@@ -166,7 +168,7 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 				os.system(cliMakeDir)
 
 				#Now we compile just the statement	
-				cliCompile = 'laton  -o '+ dictSavedStatement['URL_PDF_State'] + ' ' + absoluteURL 			
+				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_State'].rsplit('.',1)[0] + ' ' + absoluteURL 			
 				os.system(cliCompile)
 
 				#Now we compile the statement with the solutions
@@ -189,14 +191,18 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 
 				#We compile the new .tex
 
-				cliCompile = 'laton -o '+ dictSavedStatement['URL_PDF_Full'] + ' '+ urlNewTex 
+				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + ' '+ urlNewTex 
 				os.system(cliCompile)
 
 				#We delete the aux .tex
 				rmAuxTex = 'rm ' + urlNewTex 
 				os.system(rmAuxTex)
+
+				con.commit()
+
 				return True
 
+		con.rollback()
 		return False
 	except mySQLException as e:
 		con.rollback()
