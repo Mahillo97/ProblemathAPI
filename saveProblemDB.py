@@ -6,8 +6,15 @@
 
 from connections import dbConnectMySQL
 from connections import mySQLException
+from werkzeug.utils import secure_filename
+import os
+import subprocess
+import time
+import re
 
 DATA_DIRECTORY = 'Data'
+DP_DIRECTORY = 'Data/dp'
+UPLOAD_FOLDER = 'Data/tmp'
 
 """****************************************************************************************************
 * Description: method to save a statement of a problem into the database 
@@ -20,18 +27,69 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
 
     try:
 
+        extension = absoluteURL.rsplit('.', 1)[1].lower()
+        dirName = absoluteURL.rsplit('.', 1)[0]
+        texStatement = ''
+
+        if extension == 'zip':
+            os.system('unzip -d '+dirName + ' ' + absoluteURL)
+            ps = subprocess.Popen(('ls', dirName), stdout=subprocess.PIPE)
+            nameTexFile = subprocess.check_output(
+                ('grep', '.tex$'), stdin=ps.stdout).decode("utf-8").rstrip()
+            ps.wait()
+
+            # We move the tex to the tmp folder with a new name
+            timeStampMark = str('{:2f}'.format(
+                time.time()*100000000)).split('.')[0]
+            filename = timeStampMark + secure_filename(nameTexFile)
+            absoluteURL = os.path.join(UPLOAD_FOLDER, filename)
+            os.rename(os.path.join(dirName, nameTexFile), absoluteURL)
+
+            # We mark that the statement has dependencies
+            dep = 1
+
+            # We get the rest of the files
+            oldPaths = []
+            oldRelativePaths = []
+            # r=root, _=directories, f = files
+            for r, _, f in os.walk(dirName):
+                for file in f:
+                    oldPaths.append(os.path.join(r, file))
+                    oldRelativePaths.append(file)
+
+            newPaths = saveDependenciesDB(con, oldPaths)
+
+            # We must edit the tex file
+
+            # Read in the file
+            file = open(absoluteURL, "r")
+            texStatement = file.read()
+            file.close()
+
+            # Replace the paths
+            for oldRelativePath, newPath in zip(oldRelativePaths, newPaths):
+                oldRelativePathName, oldRelativePathExt = os.path.split(oldRelativePath)
+                regexReplace1 = r'\{.*?' + re.escape(oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
+                regexReplace2 = r'\{.*?' + re.escape(oldRelativePathName) + r'.*?\}'
+                texSolu = re.sub(regexReplace1, os.path.join('..', newPath), texSolu)
+                texSolu = re.sub(regexReplace2, os.path.join('..', newPath), texSolu)
+
+        else:
+            dep = 0
+
         # Check tha variables to create the Query String
         sqlQueryBeginningStatement = 'INSERT INTO problem (Tex, URL_PDF_State, URL_PDF_Full, Dep_State'
         sqlQueryValues = 'VALUES (%s, %s, %s, %s'
         tupleValuesStatement = ()
 
         # We read the file
-        file = open(absoluteURL, "r")
-        texStatement = file.read()
-        file.close()
+        if(not texStatement):
+            file = open(absoluteURL, "r")
+            texStatement = file.read()
+            file.close()
 
         tupleValuesStatement = tupleValuesStatement + \
-            (texStatement, 'placeholder', 'placeholder', 0)
+            (texStatement, 'placeholder', 'placeholder', dep)
 
         if(mag):
             sqlQueryBeginningStatement = sqlQueryBeginningStatement + ', Magazine'
@@ -87,7 +145,17 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
         mycursorNewTag.close()
         mycursorTags.close()
 
-        return dict(idProblem=idProblem, URL_PDF_State=URL_PDF_State, URL_PDF_Full=URL_PDF_Full, texProblem=texStatement)
+        # We must update the dependency table to update the foreign keys
+        if(dep == 1):
+            mycursorUpdateDependencies = con.cursor(prepared=True)
+            sqlQueryUpdateDependencies = 'UPDATE dependency SET Id_Problem=%s WHERE id=%s'
+            for path in newPaths:
+                _, filename = os.path.split(path)
+                idDep = filename.split('.', 1)[0]
+                mycursorUpdateDependencies.execute(
+                    sqlQueryUpdateDependencies, (idProblem, idDep))
+
+        return dict(idProblem=idProblem, absoluteURL=absoluteURL, URL_PDF_State=URL_PDF_State, URL_PDF_Full=URL_PDF_Full, texProblem=texStatement)
 
     except mySQLException as e:
         con.rollback()
@@ -105,15 +173,69 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
 
     try:
 
+        extension = absoluteURLSolution.rsplit('.', 1)[1].lower()
+        dirName = absoluteURLSolution.rsplit('.', 1)[0]
+
+        if extension == 'zip':
+            os.system('unzip -d '+dirName + ' ' + absoluteURLSolution)
+            ps = subprocess.Popen(('ls', dirName), stdout=subprocess.PIPE)
+            nameTexFile = subprocess.check_output(
+                ('grep', '.tex$'), stdin=ps.stdout).decode("utf-8").rstrip()
+            ps.wait()
+
+            # We move the tex to the tmp folder with a new name
+            timeStampMark = str('{:2f}'.format(
+                time.time()*100000000)).split('.')[0]
+            filename = timeStampMark + secure_filename(nameTexFile)
+            absoluteURLSolution = os.path.join(UPLOAD_FOLDER, filename)
+            os.rename(os.path.join(dirName, nameTexFile), absoluteURLSolution)
+
+            # We mark that the statement has dependencies
+            dep = 1
+
+            # We get the rest of the files
+            oldPaths = []
+            oldRelativePaths = []
+            # r=root, _=directories, f = files
+            for r, _, f in os.walk(dirName):
+                for file in f:
+                    oldPaths.append(os.path.join(r, file))
+                    oldRelativePaths.append(file)
+
+            newPaths = saveDependenciesDB(con, oldPaths)
+
+            # We must edit the tex file
+
+            # Read in the file
+            file = open(absoluteURLSolution, "r")
+            texSolu = file.read()
+            file.close()
+
+            # Replace the paths
+            for oldRelativePath, newPath in zip(oldRelativePaths, newPaths):
+                oldRelativePathExt = oldRelativePath.split(".",1)[1]
+                oldRelativePathName = oldRelativePath.split(".",1)[0]
+
+                regexReplace1 = r'\{.*?' + re.escape(oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
+                regexReplace2 = r'\{.*?' + re.escape(oldRelativePathName) + r'.*?\}'
+
+                texSolu = re.sub(regexReplace1, '{' + newPath + '}', texSolu)
+                texSolu = re.sub(regexReplace2, '{' + newPath + '}', texSolu)
+                
+
+        else:
+            dep = 0
+
         # Check tha variables to create the Query String
         sqlQueryBeginningSolu = 'INSERT INTO solution (Id_Problem, Tex, Dep_Solu'
         sqlQueryValuesSolu = 'VALUES (%s, %s, %s'
         tupleValuesSolu = ()
 
         # We read the file
-        file = open(absoluteURLSolution, "r")
-        texSolu = file.read()
-        file.close()
+        if(not texSolu):
+            file = open(absoluteURLSolution, "r")
+            texSolu = file.read()
+            file.close()
 
         # We get just the tex between the begin and end document tags
         texSolu = texSolu[texSolu.find(
@@ -137,9 +259,58 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
         idSolu = mycursorSolu.lastrowid
         mycursorSolu.close()
 
-        # We commit the changes
+        # We must update the dependency table to update the foreign keys
+        if(dep == 1):
+            mycursorUpdateDependencies = con.cursor(prepared=True)
+            sqlQueryUpdateDependencies = 'UPDATE dependency SET Id_Solu=%s WHERE id=%s'
+            for path in newPaths:
+                _, filename = os.path.split(path)
+                idDep = filename.split('.', 1)[0]
+                mycursorUpdateDependencies.execute(
+                    sqlQueryUpdateDependencies, (idSolu, idDep))
 
         return dict(idSolu=idSolu, texSolu=texSolu)
+
+    except mySQLException as e:
+        con.rollback()
+        raise e
+
+
+"""****************************************************************************************************
+* Description: method to save a statement of a problem into the database 
+* INPUT: -
+* OUTPUT: true if it has been saved correctly, no in other case
+****************************************************************************************************"""
+
+
+def saveDependenciesDB(con, paths):
+
+    try:
+        newPaths = []
+
+        mycursorInsert = con.cursor(prepared=True)
+        mycursorUpdate = con.cursor(prepared=True)
+        sqlQueryInsert = 'INSERT INTO dependency (URL) VALUES (%s)'
+        sqlQueryUpdate = 'UPDATE dependency SET URL=%s WHERE id=%s'
+
+        for filePath in paths:
+            fileExtension = filePath.rsplit('.', 1)[1].lower()
+            mycursorInsert.execute(sqlQueryInsert, (filePath,))
+            idDep = mycursorInsert.lastrowid
+
+            # Rename path
+            newPath = os.path.join(
+                DP_DIRECTORY, str(idDep) + '.' + fileExtension)
+            mycursorUpdate.execute(sqlQueryUpdate, (newPath, idDep))
+            newPaths.append(newPath)
+
+            # Move the file to its new location
+            os.rename(filePath, newPath)
+
+        mycursorInsert.close()
+        mycursorUpdate.close()
+
+        return newPaths
 
     except mySQLException as e:
         con.rollback()

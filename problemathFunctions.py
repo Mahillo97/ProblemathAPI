@@ -168,7 +168,8 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 				os.system(cliMakeDir)
 
 				#Now we compile just the statement	
-				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_State'].rsplit('.',1)[0] + ' ' + absoluteURL 			
+				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_State'].rsplit('.',1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
+				print(cliCompile+"\n\n")
 				os.system(cliCompile)
 
 				#Now we compile the statement with the solutions

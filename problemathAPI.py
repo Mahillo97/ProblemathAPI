@@ -287,7 +287,6 @@ class uploadProblem(Resource):
                         return None
             
             abort(400)
-
         except mySQLException:
             log.exception('mySQL Exception')
             abort(500)
