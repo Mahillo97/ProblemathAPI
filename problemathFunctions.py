@@ -208,3 +208,74 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 	except mySQLException as e:
 		con.rollback()
 		raise e
+
+
+"""****************************************************************************************************
+* Description: method to return the bills of a client
+* INPUT: customer id
+* OUTPUT: a JSON with the data client
+****************************************************************************************************"""
+def getProblemSheet(con, dictionaryProblems):
+
+	try:
+		numProblems = int(len(dictionaryProblems)/2)
+
+		for n in range(1,numProblems+1):
+			#We get the problem id
+
+			#We write the problem in
+
+			#We get the solutions id
+
+		#We save the statement
+		dictSavedStatement = saveProblemDB.saveStatementDB(con, absoluteURL, tags, mag, prop)
+
+		if dictSavedStatement:
+			listDictSavedSolu = []
+			for solutionDict in solutionsData:
+				listDictSavedSolu.append(saveProblemDB.saveSolutionDB(con, solutionDict['solutionURL'], str(dictSavedStatement['idProblem']),solutionDict['solver']))
+			
+			if listDictSavedSolu:
+
+				#We create the directory
+				cliMakeDir = 'mkdir '+ DATA_DIRECTORY+'/'+str(dictSavedStatement['idProblem'])
+				os.system(cliMakeDir)
+
+				#Now we compile just the statement	
+				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_State'].rsplit('.',1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
+				print(cliCompile+"\n\n")
+				os.system(cliCompile)
+
+				#Now we compile the statement with the solutions
+				#For that we must create a new tex
+				urlNewTex = dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + '.tex'
+				statementTex = dictSavedStatement['texProblem']
+				newTexFile = open(urlNewTex,"w+")			
+				newTexFile.write(statementTex[:statementTex.find('\\end{document}')]+'\n')
+
+				#We write each solution
+				for counter, DictSavedSolu in enumerate(listDictSavedSolu):
+					solutionTex = DictSavedSolu['texSolu']
+					newTexFile.write('\\textbf{Solution '+ str(counter) +'}\\\\\n')
+					newTexFile.write(solutionTex)
+
+				#We end the document
+				newTexFile.write('\\end{document}')
+				newTexFile.flush()
+				newTexFile.close()
+
+				#We compile the new .tex
+
+				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + ' '+ urlNewTex 
+				os.system(cliCompile)
+
+				#We delete the aux .tex
+				rmAuxTex = 'rm ' + urlNewTex 
+				os.system(rmAuxTex)
+
+		
+
+				return True
+		return False
+	except mySQLException as e:
+		raise e

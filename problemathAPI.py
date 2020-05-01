@@ -168,9 +168,6 @@ class problemPDFState(Resource):
             urlPDF = problemathFunctions.getProblemPDFState(con, problem_id)
             PDFName = urlPDF.split("/")[-1]
             PDFDirectory = urlPDF[:urlPDF.rindex("/")]
-            print(urlPDF)
-            print(PDFName)
-            print(PDFDirectory)
             return send_from_directory(PDFDirectory, PDFName)
 
         except ValueError:
@@ -203,11 +200,8 @@ class problemPDFFull(Resource):
             problem_id = int(problem_id)
             con = dbConnectMySQL()
             urlPDF = problemathFunctions.getProblemPDFFull(con, problem_id)
-            print(urlPDF)
             PDFName = urlPDF.split("/")[-1]
-            print(PDFName)
             PDFDirectory = urlPDF[:urlPDF.rindex("/")]
-            print(PDFDirectory)
             return send_from_directory(PDFDirectory, PDFName)
 
         except ValueError:
@@ -228,8 +222,6 @@ class problemPDFFull(Resource):
 * INPUT: customer id
 * OUTPUT: a JSON with the bills of the client
 ****************************************************************************************************"""
-
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -296,6 +288,46 @@ class uploadProblem(Resource):
                     con.close()
             except mySQLException:
                 log.exception('Unable to close connection')
+
+"""****************************************************************************************************
+* Description: method to return a pdf of a series of problems
+* INPUT: 
+* OUTPUT: a PDF
+****************************************************************************************************"""
+
+class getProblemSheet(Resource):
+
+    def get(self):
+
+        # Create the connection to upload the problem
+        con = None
+        try:
+            con = dbConnectMySQL()
+            keys = list(request.args.keys())
+            num = int(len(keys)/2)
+            keysP = list(filter(lambda x: x.startswith('problem'), keys))
+            keysP.sort()
+            keysS = list(filter(lambda x: x.startswith('solution'), keys))
+            keysS.sort()
+
+            if keysP and keysS and len(keysP)==num and len(keysS)==num:
+                if (all((keysP[n][-1]==str(n) and keysS[n][-1]==str(n)) for n in range(1,num+1))):
+                    urlPDF = problemathFunctions.getProblemSheet(con, request.args)
+                    PDFName = urlPDF.split("/")[-1]
+                    PDFDirectory = urlPDF[:urlPDF.rindex("/")]
+                    return send_from_directory(PDFDirectory, PDFName)
+
+            abort(400)
+        except mySQLException:
+            log.exception('mySQL Exception')
+            abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
+
 
 """****************************************************************************************************
 * Description: allow to create users for the API
