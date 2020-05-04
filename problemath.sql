@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.0-dmr, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: problemath
+-- Host: localhost    Database: problemath
 -- ------------------------------------------------------
--- Server version	8.0.19
+-- Server version	8.0.0-dmr-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -21,18 +21,18 @@
 
 DROP TABLE IF EXISTS `dependency`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dependency` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `Id_Problem` int DEFAULT NULL,
-  `Id_Solu` int DEFAULT NULL,
-  `URL` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Problem` int(11) DEFAULT NULL,
+  `Id_Solu` int(11) DEFAULT NULL,
+  `URL` varchar(100) NOT NULL,
   PRIMARY KEY (`Id`),
   KEY `FK_DEPENDENCY_PROBLEM_idx` (`Id_Problem`),
   KEY `FK_DEPENDENCY_SOLUTION_idx` (`Id_Solu`),
   CONSTRAINT `FK_DEPENDENCY_PROBLEM` FOREIGN KEY (`Id_Problem`) REFERENCES `problem` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_DEPENDENCY_SOLUTION` FOREIGN KEY (`Id_Solu`) REFERENCES `solution` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,24 +45,48 @@ LOCK TABLES `dependency` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `package`
+--
+
+DROP TABLE IF EXISTS `package`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `package` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(50) NOT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `Name_UNIQUE` (`Name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `package`
+--
+
+LOCK TABLES `package` WRITE;
+/*!40000 ALTER TABLE `package` DISABLE KEYS */;
+/*!40000 ALTER TABLE `package` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `problem`
 --
 
 DROP TABLE IF EXISTS `problem`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `problem` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `Magazine` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Tex` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
-  `Proposer` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Dep_State` tinyint NOT NULL,
-  `URL_PDF_State` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `URL_PDF_Full` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Magazine` varchar(100) DEFAULT NULL,
+  `Tex` mediumtext NOT NULL,
+  `Proposer` varchar(50) DEFAULT NULL,
+  `Dep_State` tinyint(4) NOT NULL,
+  `URL_PDF_State` varchar(100) NOT NULL,
+  `URL_PDF_Full` varchar(100) NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `URL_PDF_State_UNIQUE` (`URL_PDF_State`),
   UNIQUE KEY `URL_PDF_Full_UNIQUE` (`URL_PDF_Full`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,8 +95,35 @@ CREATE TABLE `problem` (
 
 LOCK TABLES `problem` WRITE;
 /*!40000 ALTER TABLE `problem` DISABLE KEYS */;
-INSERT INTO `problem` VALUES (1,NULL,'tex','Ciaurri',0,'url.pdf','url2.pdf'),(2,'Gaceta','tex2','Mahillo',1,'ur3l.pdf','url4.pdf'),(3,NULL,'tex',NULL,0,'url','url7.pdf');
 /*!40000 ALTER TABLE `problem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `problem_package`
+--
+
+DROP TABLE IF EXISTS `problem_package`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `problem_package` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Problem` int(11) NOT NULL,
+  `Id_Package` int(11) NOT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `FK_PROBLEM_PACKAGE_PROBLEM_idx` (`Id_Problem`),
+  KEY `FK_PROBLEM_PACKAGE_PACKAGE_idx` (`Id_Package`),
+  CONSTRAINT `FK_PROBLEM_PACKAGE_PACKAGE` FOREIGN KEY (`Id_Package`) REFERENCES `package` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_PROBLEM_PACKAGE_PROBLEM` FOREIGN KEY (`Id_Problem`) REFERENCES `problem` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `problem_package`
+--
+
+LOCK TABLES `problem_package` WRITE;
+/*!40000 ALTER TABLE `problem_package` DISABLE KEYS */;
+/*!40000 ALTER TABLE `problem_package` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -81,17 +132,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `problem_tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `problem_tag` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `Id_Problem` int NOT NULL,
-  `Id_Tag` int NOT NULL,
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Problem` int(11) NOT NULL,
+  `Id_Tag` int(11) NOT NULL,
   PRIMARY KEY (`Id`),
   KEY `FK_PROBLEM_TAG_PROBLEM_idx` (`Id_Problem`),
   KEY `FK_PROBLEM_TAG_TAG_idx` (`Id_Tag`),
   CONSTRAINT `FK_PROBLEM_TAG_PROBLEM` FOREIGN KEY (`Id_Problem`) REFERENCES `problem` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_PROBLEM_TAG_TAG` FOREIGN KEY (`Id_Tag`) REFERENCES `tag` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -100,7 +151,6 @@ CREATE TABLE `problem_tag` (
 
 LOCK TABLES `problem_tag` WRITE;
 /*!40000 ALTER TABLE `problem_tag` DISABLE KEYS */;
-INSERT INTO `problem_tag` VALUES (1,1,2),(2,1,3),(3,3,1),(4,2,1),(5,2,2);
 /*!40000 ALTER TABLE `problem_tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,17 +160,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `solution`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `solution` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `Id_Problem` int NOT NULL,
-  `Tex` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
-  `Solver` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `Dep_Solu` tinyint NOT NULL,
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Id_Problem` int(11) NOT NULL,
+  `Tex` mediumtext NOT NULL,
+  `Solver` varchar(50) DEFAULT NULL,
+  `Dep_Solu` tinyint(4) NOT NULL,
   PRIMARY KEY (`Id`),
   KEY `FK_SOLUTION_PROBLEM_idx` (`Id_Problem`),
   CONSTRAINT `FK_SOLUTION_PROBLEM` FOREIGN KEY (`Id_Problem`) REFERENCES `problem` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -138,12 +188,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tag` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `Name` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(50) NOT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `Name_UNIQUE` (`Name`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,7 +203,7 @@ CREATE TABLE `tag` (
 
 LOCK TABLES `tag` WRITE;
 /*!40000 ALTER TABLE `tag` DISABLE KEYS */;
-INSERT INTO `tag` VALUES (1,'analisis'),(2,'algebra'),(3,'tvm'),(4,'tcd'),(5,'integral');
+INSERT INTO `tag` VALUES (6,'alnalis');
 /*!40000 ALTER TABLE `tag` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -162,14 +213,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` char(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(20) NOT NULL,
+  `password` char(64) NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -191,4 +242,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-16 12:52:40
+-- Dump completed on 2020-05-06 10:41:23
