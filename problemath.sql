@@ -109,6 +109,7 @@ CREATE TABLE `problem_package` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `Id_Problem` int(11) NOT NULL,
   `Id_Package` int(11) NOT NULL,
+  `Parameter` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`Id`),
   KEY `FK_PROBLEM_PACKAGE_PROBLEM_idx` (`Id_Problem`),
   KEY `FK_PROBLEM_PACKAGE_PACKAGE_idx` (`Id_Package`),
@@ -242,4 +243,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-05-06 10:41:23
+-- Dump completed on 2020-05-06 11:42:41

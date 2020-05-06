@@ -167,22 +167,38 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 				cliMakeDir = 'mkdir '+ DATA_DIRECTORY+'/'+str(dictSavedStatement['idProblem'])
 				os.system(cliMakeDir)
 
-				#Now we compile just the statement	
+				#Now we compile just the statement
 				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_State'].rsplit('.',1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
 				print(cliCompile+"\n\n")
 				os.system(cliCompile)
 
 				#Now we compile the statement with the solutions
+
 				#For that we must create a new tex
 				urlNewTex = dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + '.tex'
 				statementTex = dictSavedStatement['texProblem']
-				newTexFile = open(urlNewTex,"w+")			
-				newTexFile.write(statementTex[:statementTex.find('\\end{document}')]+'\n')
+				newTexFile = open(urlNewTex,"w+")
+
+				#We start the document
+				newTexFile.write('\\documentclass{article}\n')
+
+				#We write the packages
+				if(dictSavedStatement['packagesWithoutOptions']):
+					for package in dictSavedStatement['packagesWithoutOptions']:
+						newTexFile.write('\\usepackage{'+ package +'}\n')
+
+				if(dictSavedStatement['packagesWithOptions']):
+					for tuplePackage in dictSavedStatement['packagesWithOptions']:
+						newTexFile.write('\\usepackage['+ tuplePackage[0] +']{'+ tuplePackage[1] +'}\n')
+
+				#We write the statement
+				newTexFile.write('\\begin{document}\n')
+				newTexFile.write(statementTex +'\n')
 
 				#We write each solution
 				for counter, DictSavedSolu in enumerate(listDictSavedSolu):
 					solutionTex = DictSavedSolu['texSolu']
-					newTexFile.write('\\textbf{Solution '+ str(counter) +'}\\\\\n')
+					newTexFile.write('\\textbf{Solution '+ str(counter+1) +'}\\\\\n')
 					newTexFile.write(solutionTex)
 
 				#We end the document
@@ -215,67 +231,67 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 * INPUT: customer id
 * OUTPUT: a JSON with the data client
 ****************************************************************************************************"""
-def getProblemSheet(con, dictionaryProblems):
+# def getProblemSheet(con, dictionaryProblems):
 
-	try:
-		numProblems = int(len(dictionaryProblems)/2)
+# 	try:
+# 		numProblems = int(len(dictionaryProblems)/2)
 
-		for n in range(1,numProblems+1):
-			#We get the problem id
+# 		for n in range(1,numProblems+1):
+# 			#We get the problem id
 
-			#We write the problem in
+# 			#We write the problem in
 
-			#We get the solutions id
+# 			#We get the solutions id
 
-		#We save the statement
-		dictSavedStatement = saveProblemDB.saveStatementDB(con, absoluteURL, tags, mag, prop)
+# 		#We save the statement
+# 		dictSavedStatement = saveProblemDB.saveStatementDB(con, absoluteURL, tags, mag, prop)
 
-		if dictSavedStatement:
-			listDictSavedSolu = []
-			for solutionDict in solutionsData:
-				listDictSavedSolu.append(saveProblemDB.saveSolutionDB(con, solutionDict['solutionURL'], str(dictSavedStatement['idProblem']),solutionDict['solver']))
+# 		if dictSavedStatement:
+# 			listDictSavedSolu = []
+# 			for solutionDict in solutionsData:
+# 				listDictSavedSolu.append(saveProblemDB.saveSolutionDB(con, solutionDict['solutionURL'], str(dictSavedStatement['idProblem']),solutionDict['solver']))
 			
-			if listDictSavedSolu:
+# 			if listDictSavedSolu:
 
-				#We create the directory
-				cliMakeDir = 'mkdir '+ DATA_DIRECTORY+'/'+str(dictSavedStatement['idProblem'])
-				os.system(cliMakeDir)
+# 				#We create the directory
+# 				cliMakeDir = 'mkdir '+ DATA_DIRECTORY+'/'+str(dictSavedStatement['idProblem'])
+# 				os.system(cliMakeDir)
 
-				#Now we compile just the statement	
-				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_State'].rsplit('.',1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
-				print(cliCompile+"\n\n")
-				os.system(cliCompile)
+# 				#Now we compile just the statement	
+# 				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_State'].rsplit('.',1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
+# 				print(cliCompile+"\n\n")
+# 				os.system(cliCompile)
 
-				#Now we compile the statement with the solutions
-				#For that we must create a new tex
-				urlNewTex = dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + '.tex'
-				statementTex = dictSavedStatement['texProblem']
-				newTexFile = open(urlNewTex,"w+")			
-				newTexFile.write(statementTex[:statementTex.find('\\end{document}')]+'\n')
+# 				#Now we compile the statement with the solutions
+# 				#For that we must create a new tex
+# 				urlNewTex = dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + '.tex'
+# 				statementTex = dictSavedStatement['texProblem']
+# 				newTexFile = open(urlNewTex,"w+")			
+# 				newTexFile.write(statementTex[:statementTex.find('\\end{document}')]+'\n')
 
-				#We write each solution
-				for counter, DictSavedSolu in enumerate(listDictSavedSolu):
-					solutionTex = DictSavedSolu['texSolu']
-					newTexFile.write('\\textbf{Solution '+ str(counter) +'}\\\\\n')
-					newTexFile.write(solutionTex)
+# 				#We write each solution
+# 				for counter, DictSavedSolu in enumerate(listDictSavedSolu):
+# 					solutionTex = DictSavedSolu['texSolu']
+# 					newTexFile.write('\\textbf{Solution '+ str(counter) +'}\\\\\n')
+# 					newTexFile.write(solutionTex)
 
-				#We end the document
-				newTexFile.write('\\end{document}')
-				newTexFile.flush()
-				newTexFile.close()
+# 				#We end the document
+# 				newTexFile.write('\\end{document}')
+# 				newTexFile.flush()
+# 				newTexFile.close()
 
-				#We compile the new .tex
+# 				#We compile the new .tex
 
-				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + ' '+ urlNewTex 
-				os.system(cliCompile)
+# 				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + ' '+ urlNewTex 
+# 				os.system(cliCompile)
 
-				#We delete the aux .tex
-				rmAuxTex = 'rm ' + urlNewTex 
-				os.system(rmAuxTex)
+# 				#We delete the aux .tex
+# 				rmAuxTex = 'rm ' + urlNewTex 
+# 				os.system(rmAuxTex)
 
 		
 
-				return True
-		return False
-	except mySQLException as e:
-		raise e
+# 				return True
+# 		return False
+# 	except mySQLException as e:
+# 		raise e

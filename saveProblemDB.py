@@ -61,18 +61,25 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
 
             # We must edit the tex file
 
-            # Read in the file
+            # Read in the file to get the tet inside the document and the packages
             file = open(absoluteURL, "r")
             texStatement = file.read()
             file.close()
 
             # Replace the paths
             for oldRelativePath, newPath in zip(oldRelativePaths, newPaths):
-                oldRelativePathName, oldRelativePathExt = os.path.split(oldRelativePath)
-                regexReplace1 = r'\{.*?' + re.escape(oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
-                regexReplace2 = r'\{.*?' + re.escape(oldRelativePathName) + r'.*?\}'
-                texSolu = re.sub(regexReplace1, os.path.join('..', newPath), texSolu)
-                texSolu = re.sub(regexReplace2, os.path.join('..', newPath), texSolu)
+                oldRelativePathName, oldRelativePathExt = os.path.split(
+                    oldRelativePath)
+
+                regexReplace1 = r'\{.*?' + re.escape(
+                    oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
+                regexReplace2 = r'\{.*?' + \
+                    re.escape(oldRelativePathName) + r'.*?\}'
+
+                texStatement = re.sub(regexReplace1, os.path.join(
+                    '..', newPath), texStatement)
+                texStatement = re.sub(regexReplace2, os.path.join(
+                    '..', newPath), texStatement)
 
         else:
             dep = 0
@@ -87,6 +94,29 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
             file = open(absoluteURL, "r")
             texStatement = file.read()
             file.close()
+
+        # From the tex we must get que packages
+
+        headerLines = texStatement[:texStatement.find('\\begin{document}')].splitlines()
+        packagesWithoutOptions=[]
+        packagesWithOptions=[]
+
+        for line in headerLines:
+            #We remove evrything that has been commented in the tex and find the packages
+
+            packAux = re.findall(
+                r'\\usepackage\{(.*?)\}', line[:line.find('%') if line.find('%')!=-1 else len(line)])
+            if(packAux):
+                packagesWithoutOptions = list(set(packagesWithoutOptions + packAux))
+            
+            packAux = re.findall(
+                r'\\usepackage\[(.*?)\]\{(.*?)\}', line[:line.find('%') if line.find('%')!=-1 else len(line)])
+            if(packAux):
+                packagesWithOptions = list(set(packagesWithOptions + packAux))
+
+        # We get just the tex between the begin and end document tags
+        texStatement = texStatement[texStatement.find(
+            '\\begin{document}') + len('\\begin{document}'):texStatement.find('\\end{document}')]
 
         tupleValuesStatement = tupleValuesStatement + \
             (texStatement, 'placeholder', 'placeholder', dep)
@@ -145,6 +175,48 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
         mycursorNewTag.close()
         mycursorTags.close()
 
+        # We add the packages to the database
+        mycursorFindPackage = con.cursor(prepared=True)
+        mycursorNewPackage = con.cursor(prepared=True)
+        mycursorPackages = con.cursor(prepared=True)
+
+        if (packagesWithoutOptions or packagesWithOptions):
+            sqlQueryFindPackage = 'SELECT Id FROM package WHERE Name = %s '
+            sqlQueryNewPackage = 'INSERT INTO package (Name) VALUES (%s)'
+            sqlQueryPackages = 'INSERT INTO problem_package (Id_Problem,Id_Package,Parameter) VALUES (%s,%s,%s)'
+
+            for package in packagesWithoutOptions:
+                idPackage = None
+                mycursorFindPackage.execute(sqlQueryFindPackage, (package,))
+                row = mycursorFindPackage.fetchone()
+                print(row)
+                if row is None:
+                    mycursorNewPackage.execute(sqlQueryNewPackage, (package,))
+                    idPackage = mycursorNewPackage.lastrowid
+                else:
+                    idPackage = row[0]
+                print(idPackage)
+                mycursorPackages.execute(
+                    sqlQueryPackages, (idProblem, idPackage, None))
+
+            for packageTuple in packagesWithOptions:
+                idPackage = None
+                mycursorFindPackage.execute(
+                    sqlQueryFindPackage, (packageTuple[1],))
+                row = mycursorFindPackage.fetchone()
+                if row is None:
+                    mycursorNewPackage.execute(
+                        sqlQueryNewPackage, (packageTuple[1],))
+                    idPackage = mycursorNewPackage.lastrowid
+                else:
+                    idPackage = row[0]
+                mycursorPackages.execute(
+                    sqlQueryPackages, (idProblem, idPackage, packageTuple[0]))
+
+        mycursorFindPackage.close()
+        mycursorNewPackage.close()
+        mycursorPackages.close()
+
         # We must update the dependency table to update the foreign keys
         if(dep == 1):
             mycursorUpdateDependencies = con.cursor(prepared=True)
@@ -155,7 +227,9 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                 mycursorUpdateDependencies.execute(
                     sqlQueryUpdateDependencies, (idProblem, idDep))
 
-        return dict(idProblem=idProblem, absoluteURL=absoluteURL, URL_PDF_State=URL_PDF_State, URL_PDF_Full=URL_PDF_Full, texProblem=texStatement)
+        return dict(idProblem=idProblem, absoluteURL=absoluteURL, URL_PDF_State=URL_PDF_State,
+                    URL_PDF_Full=URL_PDF_Full, texProblem=texStatement, packagesWithoutOptions=packagesWithoutOptions,
+                    packagesWithOptions=packagesWithOptions)
 
     except mySQLException as e:
         con.rollback()
@@ -213,15 +287,16 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
 
             # Replace the paths
             for oldRelativePath, newPath in zip(oldRelativePaths, newPaths):
-                oldRelativePathExt = oldRelativePath.split(".",1)[1]
-                oldRelativePathName = oldRelativePath.split(".",1)[0]
+                oldRelativePathExt = oldRelativePath.split(".", 1)[1]
+                oldRelativePathName = oldRelativePath.split(".", 1)[0]
 
-                regexReplace1 = r'\{.*?' + re.escape(oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
-                regexReplace2 = r'\{.*?' + re.escape(oldRelativePathName) + r'.*?\}'
+                regexReplace1 = r'\{.*?' + re.escape(
+                    oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
+                regexReplace2 = r'\{.*?' + \
+                    re.escape(oldRelativePathName) + r'.*?\}'
 
                 texSolu = re.sub(regexReplace1, '{' + newPath + '}', texSolu)
                 texSolu = re.sub(regexReplace2, '{' + newPath + '}', texSolu)
-                
 
         else:
             dep = 0
