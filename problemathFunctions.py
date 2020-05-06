@@ -173,7 +173,6 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 				os.system(cliCompile)
 
 				#Now we compile the statement with the solutions
-
 				#For that we must create a new tex
 				urlNewTex = dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + '.tex'
 				statementTex = dictSavedStatement['texProblem']
@@ -207,13 +206,17 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 				newTexFile.close()
 
 				#We compile the new .tex
-
 				cliCompile = 'pdflatex -jobname='+ dictSavedStatement['URL_PDF_Full'].rsplit('.',1)[0] + ' '+ urlNewTex 
 				os.system(cliCompile)
 
 				#We delete the aux .tex
-				rmAuxTex = 'rm ' + urlNewTex 
-				os.system(rmAuxTex)
+				os.remove(urlNewTex)
+
+				#We remove the files
+				for DictSavedSolu in listDictSavedSolu:
+					os.remove(DictSavedSolu['absoluteURLSolution'])
+
+				os.remove(dictSavedStatement['absoluteURL'])
 
 				con.commit()
 

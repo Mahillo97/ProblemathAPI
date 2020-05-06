@@ -38,6 +38,9 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                 ('grep', '.tex$'), stdin=ps.stdout).decode("utf-8").rstrip()
             ps.wait()
 
+            #Delete the zip zile
+            os.remove(absoluteURL)
+
             # We move the tex to the tmp folder with a new name
             timeStampMark = str('{:2f}'.format(
                 time.time()*100000000)).split('.')[0]
@@ -59,8 +62,10 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
 
             newPaths = saveDependenciesDB(con, oldPaths)
 
-            # We must edit the tex file
+            #We remove the directory that right now it's empty
+            os.removedirs(dirName)
 
+            # We must edit the tex file
             # Read in the file to get the tet inside the document and the packages
             file = open(absoluteURL, "r")
             texStatement = file.read()
@@ -257,6 +262,9 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 ('grep', '.tex$'), stdin=ps.stdout).decode("utf-8").rstrip()
             ps.wait()
 
+            #Delete the zip zile
+            os.remove(absoluteURLSolution)
+
             # We move the tex to the tmp folder with a new name
             timeStampMark = str('{:2f}'.format(
                 time.time()*100000000)).split('.')[0]
@@ -278,8 +286,10 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
 
             newPaths = saveDependenciesDB(con, oldPaths)
 
-            # We must edit the tex file
+            #We remove the directory that right now it's empty
+            os.removedirs(dirName)
 
+            # We must edit the tex file
             # Read in the file
             file = open(absoluteURLSolution, "r")
             texSolu = file.read()
@@ -344,7 +354,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 mycursorUpdateDependencies.execute(
                     sqlQueryUpdateDependencies, (idSolu, idDep))
 
-        return dict(idSolu=idSolu, texSolu=texSolu)
+        return dict(idSolu=idSolu, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution)
 
     except mySQLException as e:
         con.rollback()

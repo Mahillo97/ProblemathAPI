@@ -270,12 +270,6 @@ class uploadProblem(Resource):
 
                         problemathFunctions.saveProblem(con, absoluteURL, solutionsData, tags, mag, prop)
 
-                        for solution in solutionsData:
-                            os.remove(solution['solutionURL'])
-
-                        os.remove(absoluteURL)
-
-
                         return None
             
             abort(400)
