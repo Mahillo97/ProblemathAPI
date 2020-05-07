@@ -305,7 +305,7 @@ class getProblemSheet(Resource):
             keysS.sort()
 
             if keysP and keysS and len(keysP)==num and len(keysS)==num:
-                if (all((keysP[n][-1]==str(n) and keysS[n][-1]==str(n)) for n in range(1,num+1))):
+                if (all((keysP[n-1][-1]==str(n) and keysS[n-1][-1]==str(n)) for n in range(1,num+1))):
                     urlPDF = problemathFunctions.getProblemSheet(con, request.args)
                     PDFName = urlPDF.split("/")[-1]
                     PDFDirectory = urlPDF[:urlPDF.rindex("/")]
@@ -458,6 +458,7 @@ api.add_resource(problemQueryList, '/users/problems')
 api.add_resource(problemQuery, '/users/problem/<problem_id>')
 api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
 api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
+api.add_resource(getProblemSheet, '/users/getProblemSheet')
 api.add_resource(uploadProblem, '/admin/uploadProblem')
 api.add_resource(userManagement, '/users')
 api.add_resource(ping, '/ping')

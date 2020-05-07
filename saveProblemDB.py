@@ -254,6 +254,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
 
         extension = absoluteURLSolution.rsplit('.', 1)[1].lower()
         dirName = absoluteURLSolution.rsplit('.', 1)[0]
+        texSolu = ''
 
         if extension == 'zip':
             os.system('unzip -d '+dirName + ' ' + absoluteURLSolution)
