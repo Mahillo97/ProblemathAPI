@@ -298,6 +298,8 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 newTexFile.write('\\documentclass{article}\n')
 
                 # We write the packages
+
+                newTexFile.write('\\usepackage{float}\n')
                 
                 if(dictSavedStatement['packagesWithOptions']):
                     for tuplePackage in dictSavedStatement['packagesWithOptions']:
