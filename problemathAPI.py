@@ -19,7 +19,7 @@ import os
 import time
 
 UPLOAD_FOLDER = 'Data/tmp'
-ALLOWED_EXTENSIONS = {'tex','zip'}
+ALLOWED_EXTENSIONS = {'tex', 'zip'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -216,12 +216,47 @@ class problemPDFFull(Resource):
             except mySQLException:
                 log.exception('Unable to close connection')
 
+                """****************************************************************************************************
+* Description: method to return the current servs of a client in the database
+* INPUT: customer id
+* OUTPUT: a JSON with the servs of the client
+****************************************************************************************************"""
+
+
+class dependency(Resource):
+    def get(self, dependency_id):
+
+        # Select in the database the info for the selected problem
+        con = None
+        try:
+            # Check if dependency_id is an int
+            dependency_id = int(dependency_id)
+            con = dbConnectMySQL()
+            urlImage = problemathFunctions.getDependency(con, dependency_id)
+            imageName = urlImage.split("/")[-1]
+            imageDirectory = urlImage[:urlImage.rindex("/")]
+            return send_from_directory(imageDirectory, imageName)
+
+        except ValueError:
+            abort(400)
+        except mySQLException:
+            log.exception('mySQL Exception')
+            abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
+
 
 """****************************************************************************************************
 * Description: method to return the current bills of a client in the database
 * INPUT: customer id
 * OUTPUT: a JSON with the bills of the client
 ****************************************************************************************************"""
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -236,29 +271,38 @@ class uploadProblem(Resource):
         try:
             con = dbConnectMySQL('admin')
             # We get the parameters in the queryString
-            validParams = ['problem','tags', 'mag', 'prop']
+            validParams = ['problem', 'tags', 'mag', 'prop']
 
-            if(all(True if x in validParams else True if (re.match('solution[1-9]?',x) or re.match('solver[1-9]?',x)) else False for x in list(request.args.keys())+list(request.form.keys()))):
+            if(all(True if x in validParams else True if (re.match('solution[1-9]?', x) or re.match('solver[1-9]?', x)) else False for x in list(request.args.keys())+list(request.form.keys()))):
                 # check if the post request has the problem part and at least one solution
                 if 'problem' in request.files and request.files['problem'].filename != '' and 'solution1' in request.files and request.files['solution1'].filename != '':
-                    problem = request.files['problem']    
-                    if problem and allowed_file(problem.filename): 
-                        timeStampMark = str('{:2f}'.format(time.time()*100000000)).split('.')[0]
-                        filename = timeStampMark + secure_filename(problem.filename)
-                        absoluteURL = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    problem = request.files['problem']
+                    if problem and allowed_file(problem.filename):
+                        timeStampMark = str('{:2f}'.format(
+                            time.time()*100000000)).split('.')[0]
+                        filename = timeStampMark + \
+                            secure_filename(problem.filename)
+                        absoluteURL = os.path.join(
+                            app.config['UPLOAD_FOLDER'], filename)
                         problem.save(absoluteURL)
 
                         solutionsData = []
 
                         for param, solution in request.files.items():
-                            numberSolu = param[param.find('solution') + len('solution'):]
-                            if re.match('solution[1-9]?',param):
+                            numberSolu = param[param.find(
+                                'solution') + len('solution'):]
+                            if re.match('solution[1-9]?', param):
                                 if solution and allowed_file(solution.filename):
-                                    solver = request.form.get('solver' + str(numberSolu))
-                                    timeStampMark = str('{:2f}'.format(time.time()*100000000)).split('.')[0]
-                                    filename = timeStampMark + secure_filename(solution.filename)
-                                    absoluteURLAux = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                                    solutionsData.append(dict(solutionURL=absoluteURLAux,solver=solver))
+                                    solver = request.form.get(
+                                        'solver' + str(numberSolu))
+                                    timeStampMark = str('{:2f}'.format(
+                                        time.time()*100000000)).split('.')[0]
+                                    filename = timeStampMark + \
+                                        secure_filename(solution.filename)
+                                    absoluteURLAux = os.path.join(
+                                        app.config['UPLOAD_FOLDER'], filename)
+                                    solutionsData.append(
+                                        dict(solutionURL=absoluteURLAux, solver=solver))
                                     solution.save(absoluteURLAux)
                                 else:
                                     abort(400)
@@ -268,10 +312,11 @@ class uploadProblem(Resource):
                         mag = request.form.get('mag')
                         prop = request.form.get('prop')
 
-                        problemathFunctions.saveProblem(con, absoluteURL, solutionsData, tags, mag, prop)
+                        problemathFunctions.saveProblem(
+                            con, absoluteURL, solutionsData, tags, mag, prop)
 
                         return None
-            
+
             abort(400)
         except mySQLException:
             log.exception('mySQL Exception')
@@ -283,11 +328,13 @@ class uploadProblem(Resource):
             except mySQLException:
                 log.exception('Unable to close connection')
 
+
 """****************************************************************************************************
 * Description: method to return a pdf of a series of problems
 * INPUT: 
 * OUTPUT: a PDF
 ****************************************************************************************************"""
+
 
 class getProblemSheet(Resource):
 
@@ -304,9 +351,10 @@ class getProblemSheet(Resource):
             keysS = list(filter(lambda x: x.startswith('solution'), keys))
             keysS.sort()
 
-            if keysP and keysS and len(keysP)==num and len(keysS)==num:
-                if (all((keysP[n-1][-1]==str(n) and keysS[n-1][-1]==str(n)) for n in range(1,num+1))):
-                    urlPDF = problemathFunctions.getProblemSheet(con, request.args)
+            if keysP and keysS and len(keysP) == num and len(keysS) == num:
+                if (all((keysP[n-1][-1] == str(n) and keysS[n-1][-1] == str(n)) for n in range(1, num+1))):
+                    urlPDF = problemathFunctions.getProblemSheet(
+                        con, request.args)
                     PDFName = urlPDF.split("/")[-1]
                     PDFDirectory = urlPDF[:urlPDF.rindex("/")]
                     return send_from_directory(PDFDirectory, PDFName)
@@ -458,6 +506,7 @@ api.add_resource(problemQueryList, '/users/problems')
 api.add_resource(problemQuery, '/users/problem/<problem_id>')
 api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
 api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
+api.add_resource(dependency, '/users/dependency/<dependency_id>')
 api.add_resource(getProblemSheet, '/users/getProblemSheet')
 api.add_resource(uploadProblem, '/admin/uploadProblem')
 api.add_resource(userManagement, '/users')
