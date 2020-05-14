@@ -382,17 +382,17 @@ def saveDependenciesDB(con, paths):
         for filePath in paths:
             fileExtension = filePath.rsplit('.', 1)[1].lower()
 
-            if(fileExtension=='pdf'):
-                fileExtension='png'
-                oldFilePath = filePath
-                filePath = filePath.rsplit('.', 1)[0]+'.png'
+            # if(fileExtension=='pdf'):
+            #     fileExtension='png'
+            #     oldFilePath = filePath
+            #     filePath = filePath.rsplit('.', 1)[0]+'.png'
 
-                #We use this variable because pdftoppm rename that way the png
-                auxfilePath = filePath.rsplit('.', 1)[0]+'-1.png'
+            #     #We use this variable because pdftoppm rename that way the png
+            #     auxfilePath = filePath.rsplit('.', 1)[0]+'-1.png'
 
-                os.system('pdftoppm ' + oldFilePath + ' ' + filePath.rsplit('.', 1)[0] +' -png')
-                os.rename(auxfilePath, filePath)
-                os.remove(oldFilePath)
+            #     os.system('pdftoppm ' + oldFilePath + ' ' + filePath.rsplit('.', 1)[0] +' -png')
+            #     os.rename(auxfilePath, filePath)
+            #     os.remove(oldFilePath)
 
             
             mycursorInsert.execute(sqlQueryInsert, (filePath,))
@@ -406,6 +406,9 @@ def saveDependenciesDB(con, paths):
 
             # Move the file to its new location
             os.rename(filePath, newPath)
+
+            # And if it's a pdf we create also a svg for the html visualization
+            os.system('pdf2svg ' + newPath + ' ' + newPath.rsplit('.', 1)[0] + '.svg')
 
         mycursorInsert.close()
         mycursorUpdate.close()
