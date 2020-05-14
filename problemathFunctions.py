@@ -24,7 +24,7 @@ def getProblemList(con, tags, mag, prop):
 
     try:
         # Check tha variables to create the Query String
-        sqlQueryBeginning = 'SELECT P.Id, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
+        sqlQueryBeginning = 'SELECT P.Id, P.Tex, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
                     FROM problem as P join problem_tag as PT on P.Id=PT.Id_Problem JOIN tag as T on PT.Id_Tag=T.Id join problem_tag as PT2 on PT2.Id_Problem = P.Id JOIN tag as T2 on PT2.Id_Tag=T2.Id '
         sqlQueryWhere = ''
         sqlQueryEnd = 'GROUP BY P.Id ORDER BY COUNT(Distinct T.Id) DESC'
