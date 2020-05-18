@@ -92,19 +92,28 @@ class problemQueryList(Resource):
             con = dbConnectMySQL()
 
             # We get the parameters in the queryString
-            validParams = ['tags', 'mag', 'prop']
+            validParams = ['tags', 'mag', 'prop', 'tamPag', 'pag']
 
             if(all(True if x in validParams else False for x in request.args.keys())):
                 tags = request.args.get('tags')
                 mag = request.args.get('mag')
                 prop = request.args.get('prop')
+                tamPag = request.args.get('tamPag')
+                pag = request.args.get('pag')
+
+                # Check if tamPag and pag are ints
+                if(tamPag):
+                    tamPag = int(tamPag)
+
+                if(pag):
+                    pag = int(pag)
 
                 # Return the JSON created in the problemath library
-
-                return jsonify(problemathFunctions.getProblemList(con, tags, mag, prop))
+                return jsonify(problemathFunctions.getProblemList(con, tags, mag, prop, tamPag, pag))
             else:
                 abort(400)
-
+        except ValueError:
+            abort(400)
         except mySQLException:
             log.exception('mySQL Exception')
             abort(500)

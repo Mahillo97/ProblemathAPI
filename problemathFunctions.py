@@ -20,14 +20,15 @@ DATA_DIRECTORY = 'Data'
 ****************************************************************************************************"""
 
 
-def getProblemList(con, tags, mag, prop):
+def getProblemList(con, tags, mag, prop, tamPag, pag):
 
     try:
         # Check tha variables to create the Query String
         sqlQueryBeginning = 'SELECT P.Id, P.Tex, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
                     FROM problem as P join problem_tag as PT on P.Id=PT.Id_Problem JOIN tag as T on PT.Id_Tag=T.Id join problem_tag as PT2 on PT2.Id_Problem = P.Id JOIN tag as T2 on PT2.Id_Tag=T2.Id '
         sqlQueryWhere = ''
-        sqlQueryEnd = 'GROUP BY P.Id ORDER BY COUNT(Distinct T.Id) DESC'
+        sqlQueryEnd = 'GROUP BY P.Id ORDER BY COUNT(Distinct T.Id) DESC '
+        sqlQueryLimit = ''
         tuple_values = ()
         if(tags or mag or prop):
             sqlQueryWhere = 'WHERE '
@@ -54,7 +55,12 @@ def getProblemList(con, tags, mag, prop):
                 tuple_values = tuple_values + (prop,)
                 sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
 
-        sqlQuery = sqlQueryBeginning + sqlQueryWhere + sqlQueryEnd
+        if((tamPag or tamPag==0) and (pag or pag==0)):
+            sqlQueryLimit = 'LIMIT %s, %s'
+            print((tamPag*pag)-1)
+            tuple_values = tuple_values + (tamPag*(pag-1),tamPag)
+
+        sqlQuery = sqlQueryBeginning + sqlQueryWhere + sqlQueryEnd + sqlQueryLimit
 
         # Execute the query
         mycursor = con.cursor(prepared=True)
@@ -109,7 +115,7 @@ def getProblem(con, problem_id):
                 json_data_solutions.append(
                     dict(zip(row_headers2, [data if not isinstance(data, bytearray) else data.decode("utf-8") for data in solution])))
             mycursor2.close()
-          
+
             json_data['solutions'] = json_data_solutions
         else:
             json_data = None
