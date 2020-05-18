@@ -22,6 +22,9 @@ DATA_DIRECTORY = 'Data'
 
 def getProblemList(con, tags, mag, prop, tamPag, pag):
 
+    #We should try to return a JSON with the total number of results and just the pages that we really want so the pagination can be done easily.
+    #This would be implemented in future versions
+
     try:
         # Check tha variables to create the Query String
         sqlQueryBeginning = 'SELECT P.Id, P.Tex, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
