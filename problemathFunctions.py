@@ -22,9 +22,6 @@ DATA_DIRECTORY = 'Data'
 
 def getProblemList(con, tags, mag, prop, tamPag, pag):
 
-    #We should try to return a JSON with the total number of results and just the pages that we really want so the pagination can be done easily.
-    #This would be implemented in future versions
-
     try:
         # Check tha variables to create the Query String
         sqlQueryBeginning = 'SELECT P.Id, P.Tex, P.Magazine, P.Proposer,group_concat(distinct T2.Name) as tags\
@@ -60,7 +57,6 @@ def getProblemList(con, tags, mag, prop, tamPag, pag):
 
         if((tamPag or tamPag==0) and (pag or pag==0)):
             sqlQueryLimit = 'LIMIT %s, %s'
-            print((tamPag*pag)-1)
             tuple_values = tuple_values + (tamPag*(pag-1),tamPag)
 
         sqlQuery = sqlQueryBeginning + sqlQueryWhere + sqlQueryEnd + sqlQueryLimit
@@ -77,6 +73,65 @@ def getProblemList(con, tags, mag, prop, tamPag, pag):
             mycursor.close()
 
         return dict(problems=json_data)
+    except mySQLException as e:
+        raise e
+
+
+"""****************************************************************************************************
+* Description: method to return a list of customers sensitive to leave the company in the next year
+* INPUT: -
+* OUTPUT: dict object with a list of customers sensitive who might leave.
+****************************************************************************************************"""
+
+
+def getProblemListSize(con, tags, mag, prop):
+
+    #We should try to return a JSON with the total number of results and just the pages that we really want so the pagination can be done easily.
+    #This would be implemented in future versions
+
+    try:
+        # Check tha variables to create the Query String
+        sqlQueryBeginning = 'SELECT count(distinct P.Id) as size\
+                    FROM problem as P join problem_tag as PT on P.Id=PT.Id_Problem JOIN tag as T on PT.Id_Tag=T.Id join problem_tag as PT2 on PT2.Id_Problem = P.Id JOIN tag as T2 on PT2.Id_Tag=T2.Id '
+        sqlQueryWhere = ''
+        tuple_values = ()
+        if(tags or mag or prop):
+            sqlQueryWhere = 'WHERE '
+            if(tags):
+                list_tags = tags.split(",")
+                tuple_values = tuple_values + tuple(list_tags)
+                for i in range(len(list_tags)):
+                    if len(list_tags) == 1:
+                        sqlQueryWhere = sqlQueryWhere + '(T.Name=%s) '
+                    elif i == 0:
+                        sqlQueryWhere = sqlQueryWhere + '(T.Name=%s '
+                    elif i == len(list_tags)-1:
+                        sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s) '
+                    else:
+                        sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s '
+            if(mag):
+                if(tags):
+                    sqlQueryWhere = sqlQueryWhere + 'and '
+                tuple_values = tuple_values + (mag,)
+                sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
+            if(prop):
+                if(mag or tags):
+                    sqlQueryWhere = sqlQueryWhere + 'and '
+                tuple_values = tuple_values + (prop,)
+                sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
+
+        sqlQuery = sqlQueryBeginning + sqlQueryWhere
+
+        # Execute the query
+        mycursor = con.cursor(prepared=True)
+        mycursor.execute(sqlQuery, tuple_values)
+        result = mycursor.fetchone()
+        resultDict=dict()
+        if(result):
+            resultDict = dict(size=result[0])
+        mycursor.close()
+
+        return resultDict
     except mySQLException as e:
         raise e
 
@@ -340,7 +395,6 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 # Now we compile just the statement
                 cliCompile = 'pdflatex -jobname=' + dictSavedStatement['URL_PDF_State'].rsplit(
                     '.', 1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
-                print(cliCompile+"\n\n")
                 os.system(cliCompile)
 
                 # Now we compile the statement with the solutions

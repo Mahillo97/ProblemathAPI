@@ -124,6 +124,45 @@ class problemQueryList(Resource):
             except mySQLException:
                 log.exception('Unable to close connection')
 
+"""****************************************************************************************************
+* Description: method to return a list of problems based on a QueryString
+* INPUT: QueryString
+* OUTPUT: json object with a list of problems and its basic info
+****************************************************************************************************"""
+
+
+class problemQueryListSize(Resource):
+
+    def get(self):
+        # Select in the database to get the info for the problems
+
+        con = None
+        try:
+            con = dbConnectMySQL()
+
+            # We get the parameters in the queryString
+            validParams = ['tags', 'mag', 'prop']
+
+            if(all(True if x in validParams else False for x in request.args.keys())):
+                tags = request.args.get('tags')
+                mag = request.args.get('mag')
+                prop = request.args.get('prop')
+
+                # Return the JSON created in the problemath library
+                return jsonify(problemathFunctions.getProblemListSize(con, tags, mag, prop))
+            else:
+                abort(400)
+
+        except mySQLException:
+            log.exception('mySQL Exception')
+            abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
+
 
 """****************************************************************************************************
 * Description: method to return a churn prediction for one customer
@@ -512,6 +551,7 @@ class test(Resource):
 * Methods definition
 ****************************************************************************************************"""
 api.add_resource(problemQueryList, '/users/problems')
+api.add_resource(problemQueryListSize, '/users/problems/size')
 api.add_resource(problemQuery, '/users/problem/<problem_id>')
 api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
 api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')

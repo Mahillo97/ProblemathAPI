@@ -194,13 +194,11 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                 idPackage = None
                 mycursorFindPackage.execute(sqlQueryFindPackage, (package,))
                 row = mycursorFindPackage.fetchone()
-                print(row)
                 if row is None:
                     mycursorNewPackage.execute(sqlQueryNewPackage, (package,))
                     idPackage = mycursorNewPackage.lastrowid
                 else:
                     idPackage = row[0]
-                print(idPackage)
                 mycursorPackages.execute(
                     sqlQueryPackages, (idProblem, idPackage, None))
 
