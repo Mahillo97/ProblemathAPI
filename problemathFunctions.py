@@ -393,7 +393,7 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 os.system(cliMakeDir)
 
                 # Now we compile just the statement
-                cliCompile = 'pdflatex -jobname=' + dictSavedStatement['URL_PDF_State'].rsplit(
+                cliCompile = 'pdflatex -halt-on-error -jobname=' + dictSavedStatement['URL_PDF_State'].rsplit(
                     '.', 1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
                 os.system(cliCompile)
 
@@ -437,7 +437,7 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 newTexFile.close()
 
                 # We compile the new .tex
-                cliCompile = 'pdflatex -jobname=' + \
+                cliCompile = 'pdflatex -halt-on-error -jobname=' + \
                     dictSavedStatement['URL_PDF_Full'].rsplit(
                         '.', 1)[0] + ' ' + urlNewTex
                 os.system(cliCompile)
@@ -540,7 +540,7 @@ def getProblemSheet(con, dictionaryProblems):
 
         # We compile the new .tex
 
-        cliCompile = 'pdflatex -jobname=' + \
+        cliCompile = 'pdflatex -halt-on-error -jobname=' + \
             urlNewTex.rsplit('.', 1)[0] + ' ' + urlNewTex
         os.system(cliCompile)
 
