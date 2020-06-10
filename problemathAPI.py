@@ -422,7 +422,7 @@ class getProblemSheet(Resource):
 ****************************************************************************************************"""
 
 def deletetmp():
-    os.system('find ' + app.config['UPLOAD_FOLDER'] + '/* -mmin +30 -exec rm -r {} \;')
+    os.system('find ' + app.config['UPLOAD_FOLDER'] + '/* -mmin +30 -exec rm -r {} \\;')
     
 
 sched = BackgroundScheduler(daemon=True)
