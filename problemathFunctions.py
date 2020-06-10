@@ -395,6 +395,9 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 # Now we compile just the statement
                 cliCompile = 'pdflatex -halt-on-error -jobname=' + dictSavedStatement['URL_PDF_State'].rsplit(
                     '.', 1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
+                
+                # We compile it twice just in case we need some references
+                os.system(cliCompile)
                 os.system(cliCompile)
 
                 # Now we compile the statement with the solutions
@@ -437,9 +440,11 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 newTexFile.close()
 
                 # We compile the new .tex
+                # We compile it twice just in case we need some references
                 cliCompile = 'pdflatex -halt-on-error -jobname=' + \
                     dictSavedStatement['URL_PDF_Full'].rsplit(
                         '.', 1)[0] + ' ' + urlNewTex
+                os.system(cliCompile)
                 os.system(cliCompile)
 
                 # We delete the aux .tex
