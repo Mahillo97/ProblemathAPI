@@ -1,2 +1,6 @@
+#Ignore the folders Data and __pyche__
 /Data/*
 /__pycache__/*
+
+#Ignore de the .pycfiles
+*.pyc
