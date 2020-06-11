@@ -1,6 +1,7 @@
 #Ignore the folders Data and __pyche__
 /Data/*
 /__pycache__/*
+/problemath-env/*
 
 #Ignore de the .pycfiles
 *.pyc
