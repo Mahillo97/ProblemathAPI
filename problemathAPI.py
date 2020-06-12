@@ -418,7 +418,121 @@ class getProblemSheet(Resource):
 
 
 """****************************************************************************************************
-* Daemon to delete all tmp files each hour
+* Description: allow to create users for the API
+* INUT: user and pwd
+* OUTPUT: -
+****************************************************************************************************"""
+class addUser(Resource):
+    # Authentication
+    @auth.login_required
+    def post(self):
+        # Read post parameters
+        username = request.form.get('user')
+        password = request.form.get('pwd')
+
+        # Create the connection
+        con = None
+        try:
+            #Open connection
+            con = dbConnectMySQL('admin')
+
+            # Check if the username exists in the database
+            sqlQueryUser = 'SELECT * FROM users as U WHERE U.username = %s'
+            
+            # Execute the query
+            mycursorUser = con.cursor(prepared=True)
+            mycursorUser.execute(sqlQueryUser, (username,))
+            user = mycursorUser.fetchone()
+            mycursorUser.close()
+            
+            if(not user):
+                sqlQueryInsert = 'INSERT INTO users (username,password) VALUES (%s,SHA2(%s,256))'
+
+                mycursorInsert = con.cursor(prepared=True)
+                mycursorInsert.execute(sqlQueryInsert, (username,password))
+                mycursorInsert.close()
+                con.commit()
+
+                # Return response
+                log.info(f'User {username} added to the database')
+                return {'message': 'User added to the database'}
+
+            else:
+                #The user already exists in the data base
+                abort(400, "There is already an username with this name in the database")
+        except mySQLException:         
+            try:
+                if(con is not None):
+                    con.rollback()
+                log.exception('mySQL Exception')
+            except mySQLException:
+                log.exception('Unable to rollback user')
+            finally:
+                abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
+
+
+"""****************************************************************************************************
+* Description: allow to create users for the API
+* INUT: user and pwd
+* OUTPUT: -
+****************************************************************************************************"""
+class changePassword(Resource):
+    # Authentication
+    @auth.login_required
+    def post(self):
+        # Read post parameters
+        username = request.form.get('user')
+        password = request.form.get('pwd')
+
+        # Create the connection
+        con = None
+        try:
+            #Open connection
+            con = dbConnectMySQL('admin')
+
+            # Check if the username is the same that has logged in
+            if(auth.username() ==  username):
+                #We update the password
+                
+                sqlQueryUpdate = 'UPDATE users SET password=SHA2(%s,256) WHERE username = %s'
+
+                mycursorUpdate = con.cursor(prepared=True)
+                mycursorUpdate.execute(sqlQueryUpdate, (password,username))
+                mycursorUpdate.close()
+                con.commit()
+
+                # Return response
+                log.info(f'User {username} has changed the password')
+                return {'message': f'User password changed correctly'}
+
+            else:
+                #Unable to change password, login and param doesnt match
+                abort(403)
+
+        except mySQLException:         
+            try:
+                if(con is not None):
+                    con.rollback()
+                log.exception('mySQL Exception')
+            except mySQLException:
+                log.exception('Unable to rollback user')
+            finally:
+                abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
+
+"""****************************************************************************************************
+* Daemon to delete all tmp files each 30 minutes
 ****************************************************************************************************"""
 
 def deletetmp():
@@ -440,6 +554,8 @@ api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
 api.add_resource(dependency, '/users/dependency/<dependency_id>')
 api.add_resource(getProblemSheet, '/users/getProblemSheet')
 api.add_resource(uploadProblem, '/admin/uploadProblem')
+api.add_resource(addUser, '/admin/addUser')
+api.add_resource(changePassword, '/admin/changePassword')
 api.add_resource(ping, '/ping')
 
 if __name__ == '__main__':
