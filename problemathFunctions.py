@@ -9,6 +9,7 @@ from connections import mySQLException
 import saveProblemDB
 import os
 import time
+import shutil
 
 UPLOAD_FOLDER = 'Data/tmp'
 DATA_DIRECTORY = 'Data'
@@ -55,9 +56,9 @@ def getProblemList(con, tags, mag, prop, tamPag, pag):
                 tuple_values = tuple_values + (prop,)
                 sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
 
-        if((tamPag or tamPag==0) and (pag or pag==0)):
+        if((tamPag or tamPag == 0) and (pag or pag == 0)):
             sqlQueryLimit = 'LIMIT %s, %s'
-            tuple_values = tuple_values + (tamPag*(pag-1),tamPag)
+            tuple_values = tuple_values + (tamPag*(pag-1), tamPag)
 
         sqlQuery = sqlQueryBeginning + sqlQueryWhere + sqlQueryEnd + sqlQueryLimit
 
@@ -86,8 +87,8 @@ def getProblemList(con, tags, mag, prop, tamPag, pag):
 
 def getProblemListSize(con, tags, mag, prop):
 
-    #We should try to return a JSON with the total number of results and just the pages that we really want so the pagination can be done easily.
-    #This would be implemented in future versions
+    # We should try to return a JSON with the total number of results and just the pages that we really want so the pagination can be done easily.
+    # This would be implemented in future versions
 
     try:
         # Check tha variables to create the Query String
@@ -126,7 +127,7 @@ def getProblemListSize(con, tags, mag, prop):
         mycursor = con.cursor(prepared=True)
         mycursor.execute(sqlQuery, tuple_values)
         result = mycursor.fetchone()
-        resultDict=dict()
+        resultDict = dict()
         if(result):
             resultDict = dict(size=result[0])
         mycursor.close()
@@ -395,10 +396,11 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 # Now we compile just the statement
                 cliCompile = 'pdflatex -halt-on-error -jobname=' + dictSavedStatement['URL_PDF_State'].rsplit(
                     '.', 1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
-                
+
                 # We compile it twice just in case we need some references
                 os.system(cliCompile)
-                os.system(cliCompile)
+                resultStatement = os.system(cliCompile)
+                errorCodeStatement = resultStatement >> 8
 
                 # Now we compile the statement with the solutions
                 # For that we must create a new tex
@@ -411,8 +413,6 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 newTexFile.write('\\documentclass{article}\n')
 
                 # We write the packages
-
-                newTexFile.write('\\usepackage{float}\n')
 
                 if(dictSavedStatement['packagesWithOptions']):
                     for tuplePackage in dictSavedStatement['packagesWithOptions']:
@@ -445,7 +445,8 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     dictSavedStatement['URL_PDF_Full'].rsplit(
                         '.', 1)[0] + ' ' + urlNewTex
                 os.system(cliCompile)
-                os.system(cliCompile)
+                resultFull = os.system(cliCompile)
+                errorCodeFull = resultFull >> 8
 
                 # We delete the aux .tex
                 os.remove(urlNewTex)
@@ -456,12 +457,121 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 
                 os.remove(dictSavedStatement['absoluteURL'])
 
-                con.commit()
+                if(errorCodeStatement == 0 and errorCodeFull == 0):
+                    con.commit()
+                    return True
+                else:
+                    # We delete the folder
+                    shutil.rmtree(os.path.join(DATA_DIRECTORY, str(
+                        dictSavedStatement['idProblem'])))
 
-                return True
+                    # We delete the posible dependencies
+                    # Note: this can be done because we state the transaction level as read uncommitted just in this place
+                    sqlQuerySelectDependencies = 'SELECT D.url FROM dependency as D LEFT JOIN solution as S ON Id_solu=S.Id WHERE D.Id_Problem = %s OR S.Id_Problem = %s'
 
+                    # Execute the query
+                    cursorSelectDependencies = con.cursor(prepared=True)
+                    cursorSelectDependencies.execute("SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED")
+                    cursorSelectDependencies.execute(sqlQuerySelectDependencies, (
+                        dictSavedStatement['idProblem'], dictSavedStatement['idProblem']))
+                    dependencies_data = cursorSelectDependencies.fetchall()
+                    for dependency in dependencies_data:
+                        dep_url = dependency[0].decode("utf-8")
+                        # If the extension is .pdf then it must exist an svg
+                        if(dep_url.rsplit('.', 1)[1].lower() == 'pdf'):
+                            dep_url_svg = dep_url.rsplit('.', 1)[0] + '.svg'
+                            os.remove(dep_url)
+                            os.remove(dep_url_svg)
+                        else:
+                            os.remove(dep_url)
+                    cursorSelectDependencies.close()
         con.rollback()
         return False
+    except mySQLException as e:
+        con.rollback()
+        raise e
+
+
+"""****************************************************************************************************
+* Description: method to return the bills of a client
+* INPUT: customer id
+* OUTPUT: a JSON with the data client
+****************************************************************************************************"""
+
+
+def deleteProblem(con, problem_id):
+
+    try:
+
+        con.start_transaction()
+
+        # First we delete the dependencies
+        sqlQuerySelectDependencies = 'SELECT D.url FROM dependency as D LEFT JOIN solution as S ON Id_solu=S.Id WHERE D.Id_Problem = %s OR S.Id_Problem = %s'
+
+        # Execute the query
+        cursorSelectDependencies = con.cursor(prepared=True)
+        cursorSelectDependencies.execute(
+            sqlQuerySelectDependencies, (problem_id, problem_id))
+        dependencies_data = cursorSelectDependencies.fetchall()
+        for dependency in dependencies_data:
+            dep_url = dependency[0].decode("utf-8")
+            # If the extension is .pdf then it must exist an svg
+            if(dep_url.rsplit('.', 1)[1].lower() == 'pdf'):
+                dep_url_svg = dep_url.rsplit('.', 1)[0] + '.svg'
+                os.remove(dep_url)
+                os.remove(dep_url_svg)
+            else:
+                os.remove(dep_url)
+        cursorSelectDependencies.close()
+
+        # We delete the dependencies from the database
+        sqlQueryDeleteDependencies = 'DELETE D FROM dependency as D LEFT JOIN solution as S ON Id_solu=S.Id WHERE D.Id_Problem = %s OR S.Id_Problem = %s'
+
+        # Execute the query
+        cursorDeleteDependencies = con.cursor(prepared=True)
+        cursorDeleteDependencies.execute(
+            sqlQueryDeleteDependencies, (problem_id, problem_id))
+        cursorDeleteDependencies.close()
+
+        # We delete the solutions
+        sqlQueryDeleteSolutions = 'DELETE FROM solution WHERE Id_Problem = %s'
+
+        # Execute the query
+        cursorDeleteSolutions = con.cursor(prepared=True)
+        cursorDeleteSolutions.execute(sqlQueryDeleteSolutions, (problem_id,))
+        cursorDeleteSolutions.close()
+
+        # We delete the tags
+        sqlQueryDeleteTags = 'DELETE FROM problem_tag WHERE Id_Problem = %s'
+
+        # Execute the query
+        cursorDeleteTags = con.cursor(prepared=True)
+        cursorDeleteTags.execute(sqlQueryDeleteTags, (problem_id,))
+        cursorDeleteTags.close()
+
+        # We delete the tags
+        sqlQueryDeletePackage = 'DELETE FROM problem_package WHERE Id_Problem = %s'
+
+        # Execute the query
+        cursorDeletePackage = con.cursor(prepared=True)
+        cursorDeletePackage.execute(sqlQueryDeletePackage, (problem_id,))
+        cursorDeletePackage.close()
+
+        # We remove the folder of the problem inside the Data folder
+        shutil.rmtree(os.path.join(DATA_DIRECTORY, str(problem_id)))
+
+        # We delete the problem from the database
+        sqlQueryDeleteProblem = 'DELETE FROM problem WHERE Id= %s'
+
+        # Execute the query
+        cursorDeleteProblem = con.cursor(prepared=True)
+        cursorDeleteProblem.execute(sqlQueryDeleteProblem, (problem_id,))
+        cursorDeleteProblem.close()
+
+        con.commit()
+
+        return f'The problem {problem_id} was deleted correctly.'
+
     except mySQLException as e:
         con.rollback()
         raise e
@@ -548,12 +658,14 @@ def getProblemSheet(con, dictionaryProblems):
         cliCompile = 'pdflatex -halt-on-error -jobname=' + \
             urlNewTex.rsplit('.', 1)[0] + ' ' + urlNewTex
         os.system(cliCompile)
+        result = os.system(cliCompile)
+        errorCode = result >> 8
 
         # We delete the aux .tex
         rmAuxTex = 'rm ' + urlNewTex
         os.system(rmAuxTex)
 
-        return urlNewTex.rsplit('.', 1)[0]+'.pdf'
+        return urlNewTex.rsplit('.', 1)[0]+'.pdf' if errorCode == 0 else None
 
     except mySQLException as e:
         raise e

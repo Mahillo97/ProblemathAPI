@@ -359,11 +359,48 @@ class uploadProblem(Resource):
                         mag = request.form.get('mag')
                         prop = request.form.get('prop')
 
-                        problemathFunctions.saveProblem(
-                            con, absoluteURL, solutionsData, tags, mag, prop)
+                        if(problemathFunctions.saveProblem(
+                            con, absoluteURL, solutionsData, tags, mag, prop)):
+                            return {'message':'Problem uploaded correctly.'}
+                        else:
+                            abort(400,'Errors compiling the Latex')                      
+            abort(400,'Error with the parameters')
+        except mySQLException:
+            log.exception('mySQL Exception')
+            abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
 
-                        return None
-            abort(400)
+"""****************************************************************************************************
+* Description: method to return the current bills of a client in the database
+* INPUT: customer id
+* OUTPUT: a JSON with the bills of the client
+****************************************************************************************************"""
+
+class removeProblem(Resource):
+    # Authentication
+    @auth.login_required
+    def post(self,problem_id):
+
+        # Create the connection to delete the problem
+        con = None
+        try:
+            # Check if problem_id is an int
+            problem_id = int(problem_id)
+            con = dbConnectMySQL('admin')
+
+            #Check if the problem is in the database
+            if(problemathFunctions.getProblem(con, problem_id)):
+                response = problemathFunctions.deleteProblem(con, problem_id)
+                return {'message': response}
+            else:
+                abort(404)
+        except ValueError:
+            abort(400) 
         except mySQLException:
             log.exception('mySQL Exception')
             abort(500)
@@ -401,11 +438,13 @@ class getProblemSheet(Resource):
                 if (all((keysP[n-1][-1] == str(n) and keysS[n-1][-1] == str(n)) for n in range(1, num+1))):
                     urlPDF = problemathFunctions.getProblemSheet(
                         con, request.args)
-                    PDFName = urlPDF.split("/")[-1]
-                    PDFDirectory = urlPDF[:urlPDF.rindex("/")]
-                    return send_from_directory(PDFDirectory, PDFName)
-
-            abort(400)
+                    if(urlPDF):
+                        PDFName = urlPDF.split("/")[-1]
+                        PDFDirectory = urlPDF[:urlPDF.rindex("/")]
+                        return send_from_directory(PDFDirectory, PDFName)
+                    else:
+                        abort(400,'Compile problems')            
+            abort(400,'Unvalid params')
         except mySQLException:
             log.exception('mySQL Exception')
             abort(500)
@@ -554,6 +593,7 @@ api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
 api.add_resource(dependency, '/users/dependency/<dependency_id>')
 api.add_resource(getProblemSheet, '/users/getProblemSheet')
 api.add_resource(uploadProblem, '/admin/uploadProblem')
+api.add_resource(removeProblem, '/admin/removeProblem/<problem_id>')
 api.add_resource(addUser, '/admin/addUser')
 api.add_resource(changePassword, '/admin/changePassword')
 api.add_resource(ping, '/ping')

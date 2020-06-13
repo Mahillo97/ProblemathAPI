@@ -1,5 +1,9 @@
 #Ignore the folders Data and __pyche__
 /Data/*
+!/Data/dp
+!/Data/tmp
+/Data/dp/*
+/Data/tmp/*
 /__pycache__/*
 /problemath-env/*
 
