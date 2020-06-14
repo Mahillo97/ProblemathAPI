@@ -137,10 +137,10 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
         #We remove the comments
         for line in texStatementLines:
             if line.find('%') == -1 :
-                texStatement = texStatement + line + '\r\n'
-            elif line.find('%')==0 or line.find('/%') != -1:
-                texStatement =  texStatement + line[:line.find('%')] + '\r\n'
-            else:
+                texStatement = texStatement + line + '\n'
+            elif line.find('/%') != -1:
+                texStatement =  texStatement + line[:line.find('%')] + '\n'
+            elif line.find('%') != 0:
                 indexComment = 0
                 allMatches = [m.start() for m in re.finditer('%', line)]
                 for match in allMatches:
@@ -148,9 +148,9 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                         indexComment = match
                         break
                 if indexComment == 0:
-                    texStatement = texStatement + line + '\r\n'
+                    texStatement = texStatement + line + '\n'
                 else:
-                    texStatement =  texStatement + line[:indexComment] + '\r\n'
+                    texStatement =  texStatement + line[:indexComment] + '\n'
 
         tupleValuesStatement = tupleValuesStatement + \
             (texStatement, 'placeholder', 'placeholder', dep)
@@ -356,12 +356,12 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
         texSolu = ''
         #We remove the comments
         for line in texSoluLines:
-            print(line + '\r\n')
+            print(line + '\n')
             if line.find('%') == -1 :
-                texSolu = texSolu + line + '\r\n'
-            elif line.find('%')==0 or line.find('/%') != -1:
-                texSolu =  texSolu + line[:line.find('%')] + '\r\n'
-            else:
+                texSolu = texSolu + line + '\n'
+            elif line.find('/%') != -1:
+                texSolu =  texSolu + line[:line.find('%')] + '\n'
+            elif line.find('%') != 0:
                 indexComment = 0
                 allMatches = [m.start() for m in re.finditer('%', line)]
                 for match in allMatches:
@@ -369,9 +369,9 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                         indexComment = match
                         break
                 if indexComment == 0:
-                    texSolu = texSolu + line + '\r\n'
+                    texSolu = texSolu + line + '\n'
                 else:
-                    texSolu =  texSolu + line[:indexComment] + '\r\n'
+                    texSolu =  texSolu + line[:indexComment] + '\n'
 
         print('************************************************************************')
         print(texSolu + '\r\n')
