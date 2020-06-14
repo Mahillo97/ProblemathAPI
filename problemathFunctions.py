@@ -351,12 +351,15 @@ def getDependency(con, dependency_id):
         # Execute the query
         mycursor = con.cursor(prepared=True)
         mycursor.execute(sqlQuery, (dependency_id,))
-        url = mycursor.fetchone()[0].decode("utf-8")
+        image_data = mycursor.fetchone()
         mycursor.close()
 
-        # We return images in this method
-        if(url.rsplit('.', 1)[1].lower() == 'pdf'):
-            url = url.rsplit('.', 1)[0] + '.svg'
+        url = None
+        if(image_data):
+            url = image_data[0].decode("utf-8")
+            # We return images in this method
+            if(url.rsplit('.', 1)[1].lower() == 'pdf'):
+                url = url.rsplit('.', 1)[0] + '.svg'
 
         return url
     except mySQLException as e:

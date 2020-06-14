@@ -281,10 +281,12 @@ class dependency(Resource):
             dependency_id = int(dependency_id)
             con = dbConnectMySQL()
             urlImage = problemathFunctions.getDependency(con, dependency_id)
-            imageName = urlImage.split("/")[-1]
-            imageDirectory = urlImage[:urlImage.rindex("/")]
-            return send_from_directory(imageDirectory, imageName)
-
+            if(urlImage):
+                imageName = urlImage.split("/")[-1]
+                imageDirectory = urlImage[:urlImage.rindex("/")]
+                return send_from_directory(imageDirectory, imageName)
+            else:
+                abort(404)
         except ValueError:
             abort(400)
         except mySQLException:
