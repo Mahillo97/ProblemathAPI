@@ -130,8 +130,27 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                 packagesWithOptions = list(set(packagesWithOptions + packAux))
 
         # We get just the tex between the begin and end document tags
-        texStatement = texStatement[texStatement.find(
-            '\\begin{document}') + len('\\begin{document}'):texStatement.find('\\end{document}')]
+        texStatementLines = texStatement[texStatement.find(
+            '\\begin{document}') + len('\\begin{document}'):texStatement.find('\\end{document}')].splitlines()
+        texStatement = ''
+
+        #We remove the comments
+        for line in texStatementLines:
+            if line.find('%') == -1 :
+                texStatement = texStatement + line + '\r\n'
+            elif line.find('%')==0 or line.find('/%') != -1:
+                texStatement =  texStatement + line[:line.find('%')] + '\r\n'
+            else:
+                indexComment = 0
+                allMatches = [m.start() for m in re.finditer('%', line)]
+                for match in allMatches:
+                    if line[match-1] != '/':
+                        indexComment = match
+                        break
+                if indexComment == 0:
+                    texStatement = texStatement + line + '\r\n'
+                else:
+                    texStatement =  texStatement + line[:indexComment] + '\r\n'
 
         tupleValuesStatement = tupleValuesStatement + \
             (texStatement, 'placeholder', 'placeholder', dep)
@@ -332,8 +351,31 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
             file.close()
 
         # We get just the tex between the begin and end document tags
-        texSolu = texSolu[texSolu.find(
-            '\\begin{document}') + len('\\begin{document}'):texSolu.find('\\end{document}')]
+        texSoluLines = texSolu[texSolu.find(
+            '\\begin{document}') + len('\\begin{document}'):texSolu.find('\\end{document}')].splitlines()     
+        texSolu = ''
+        #We remove the comments
+        for line in texSoluLines:
+            print(line + '\r\n')
+            if line.find('%') == -1 :
+                texSolu = texSolu + line + '\r\n'
+            elif line.find('%')==0 or line.find('/%') != -1:
+                texSolu =  texSolu + line[:line.find('%')] + '\r\n'
+            else:
+                indexComment = 0
+                allMatches = [m.start() for m in re.finditer('%', line)]
+                for match in allMatches:
+                    if line[match-1] != '/':
+                        indexComment = match
+                        break
+                if indexComment == 0:
+                    texSolu = texSolu + line + '\r\n'
+                else:
+                    texSolu =  texSolu + line[:indexComment] + '\r\n'
+
+        print('************************************************************************')
+        print(texSolu + '\r\n')
+        print('************************************************************************')
 
         tupleValuesSolu = tupleValuesSolu + (idProblem, texSolu, 0)
 
