@@ -393,14 +393,47 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     '/'+str(dictSavedStatement['idProblem'])
                 os.system(cliMakeDir)
 
-                # Now we compile just the statement
-                cliCompile = 'pdflatex -halt-on-error -jobname=' + dictSavedStatement['URL_PDF_State'].rsplit(
-                    '.', 1)[0] + ' \'' + dictSavedStatement['absoluteURL'] + '\''
+                # Now we compile the statement
+                # For that we must create a new tex
+                urlNewTexStatement = dictSavedStatement['URL_PDF_State'].rsplit('.', 1)[
+                    0] + '.tex'
+                statementTex = dictSavedStatement['texProblem']
+                newTexFileStatement = open(urlNewTexStatement, "w+")
 
+                # We start the document
+                newTexFileStatement.write('\\documentclass{article}\n')
+
+                # We write the packages
+
+                if(dictSavedStatement['packagesWithOptions']):
+                    for tuplePackage in dictSavedStatement['packagesWithOptions']:
+                        newTexFileStatement.write(
+                            '\\usepackage[' + tuplePackage[0] + ']{' + tuplePackage[1] + '}\n')
+
+                if(dictSavedStatement['packagesWithoutOptions']):
+                    for package in dictSavedStatement['packagesWithoutOptions']:
+                        newTexFileStatement.write('\\usepackage{' + package + '}\n')
+
+                # We write the statement
+                newTexFileStatement.write('\\begin{document}\n')
+                newTexFileStatement.write(statementTex + '\n')
+
+                # We end the document
+                newTexFileStatement.write('\\end{document}')
+                newTexFileStatement.flush()
+                newTexFileStatement.close()
+
+                # We compile the new .tex
                 # We compile it twice just in case we need some references
+                cliCompile = 'pdflatex -halt-on-error -jobname=' + \
+                    dictSavedStatement['URL_PDF_State'].rsplit(
+                        '.', 1)[0] + ' ' + urlNewTexStatement
                 os.system(cliCompile)
                 resultStatement = os.system(cliCompile)
                 errorCodeStatement = resultStatement >> 8
+
+                # We delete the aux .tex
+                os.remove(urlNewTexStatement)
 
                 # Now we compile the statement with the solutions
                 # For that we must create a new tex

@@ -38,7 +38,7 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                 ('grep', '.tex$'), stdin=ps.stdout).decode("utf-8").rstrip()
             ps.wait()
 
-            #Delete the zip zile
+            # Delete the zip zile
             os.remove(absoluteURL)
 
             # We move the tex to the tmp folder with a new name
@@ -62,29 +62,37 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
 
             newPaths = saveDependenciesDB(con, oldPaths)
 
-            #We remove the directory that right now it's empty
+            # We remove the directory that right now it's empty
             os.removedirs(dirName)
 
             # We must edit the tex file
-            # Read in the file to get the tet inside the document and the packages
+            # Read in the file to get the tex inside the document and the packages
             file = open(absoluteURL, "r")
             texStatement = file.read()
             file.close()
 
             # Replace the paths
             for oldRelativePath, newPath in zip(oldRelativePaths, newPaths):
-                oldRelativePathName, oldRelativePathExt = os.path.split(
-                    oldRelativePath)
+                oldRelativePathExt = oldRelativePath.split(".", 1)[1]
+                oldRelativePathName = oldRelativePath.split(".", 1)[0]
+
+                print(oldRelativePathName)
+                print(oldRelativePathExt)
 
                 regexReplace1 = r'\{.*?' + re.escape(
                     oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
                 regexReplace2 = r'\{.*?' + \
                     re.escape(oldRelativePathName) + r'.*?\}'
 
-                texStatement = re.sub(regexReplace1, os.path.join(
-                    '..', newPath), texStatement)
-                texStatement = re.sub(regexReplace2, os.path.join(
-                    '..', newPath), texStatement)
+                print(regexReplace1)
+                print(regexReplace2)
+
+                print(newPath)
+
+                texStatement = re.sub(
+                    regexReplace1, '{' + newPath + '}', texStatement)
+                texStatement = re.sub(
+                    regexReplace2, '{' + newPath + '}', texStatement)
 
         else:
             dep = 0
@@ -102,20 +110,22 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
 
         # From the tex we must get que packages
 
-        headerLines = texStatement[:texStatement.find('\\begin{document}')].splitlines()
-        packagesWithoutOptions=[]
-        packagesWithOptions=[]
+        headerLines = texStatement[:texStatement.find(
+            '\\begin{document}')].splitlines()
+        packagesWithoutOptions = []
+        packagesWithOptions = []
 
         for line in headerLines:
-            #We remove evrything that has been commented in the tex and find the packages
+            # We remove evrything that has been commented in the tex and find the packages
 
             packAux = re.findall(
-                r'\\usepackage\{(.*?)\}', line[:line.find('%') if line.find('%')!=-1 else len(line)])
+                r'\\usepackage\{(.*?)\}', line[:line.find('%') if line.find('%') != -1 else len(line)])
             if(packAux):
-                packagesWithoutOptions = list(set(packagesWithoutOptions + packAux))
-            
+                packagesWithoutOptions = list(
+                    set(packagesWithoutOptions + packAux))
+
             packAux = re.findall(
-                r'\\usepackage\[(.*?)\]\{(.*?)\}', line[:line.find('%') if line.find('%')!=-1 else len(line)])
+                r'\\usepackage\[(.*?)\]\{(.*?)\}', line[:line.find('%') if line.find('%') != -1 else len(line)])
             if(packAux):
                 packagesWithOptions = list(set(packagesWithOptions + packAux))
 
@@ -261,7 +271,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 ('grep', '.tex$'), stdin=ps.stdout).decode("utf-8").rstrip()
             ps.wait()
 
-            #Delete the zip zile
+            # Delete the zip zile
             os.remove(absoluteURLSolution)
 
             # We move the tex to the tmp folder with a new name
@@ -285,11 +295,11 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
 
             newPaths = saveDependenciesDB(con, oldPaths)
 
-            #We remove the directory that right now it's empty
+            # We remove the directory that right now it's empty
             os.removedirs(dirName)
 
             # We must edit the tex file
-            # Read in the file
+            # Read in the file to get the tex inside the document and the packages
             file = open(absoluteURLSolution, "r")
             texSolu = file.read()
             file.close()
@@ -392,7 +402,6 @@ def saveDependenciesDB(con, paths):
             #     os.rename(auxfilePath, filePath)
             #     os.remove(oldFilePath)
 
-            
             mycursorInsert.execute(sqlQueryInsert, (filePath,))
             idDep = mycursorInsert.lastrowid
 
@@ -406,7 +415,8 @@ def saveDependenciesDB(con, paths):
             os.rename(filePath, newPath)
 
             # And if it's a pdf we create also a svg for the html visualization
-            os.system('pdf2svg ' + newPath + ' ' + newPath.rsplit('.', 1)[0] + '.svg')
+            os.system('pdf2svg ' + newPath + ' ' +
+                      newPath.rsplit('.', 1)[0] + '.svg')
 
         mycursorInsert.close()
         mycursorUpdate.close()
