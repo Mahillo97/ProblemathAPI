@@ -401,7 +401,7 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 newTexFileStatement = open(urlNewTexStatement, "w+")
 
                 # We start the document
-                newTexFileStatement.write('\\documentclass{article}\n')
+                newTexFileStatement.write('\\documentclass[12pt]{article}\n')
 
                 # We write the packages
 
@@ -414,8 +414,20 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     for package in dictSavedStatement['packagesWithoutOptions']:
                         newTexFileStatement.write('\\usepackage{' + package + '}\n')
 
+                # We state the styles directives
+                newTexFileStatement.write('\\setlength{\\parindent}{0pt}\n')
+
                 # We write the statement
                 newTexFileStatement.write('\\begin{document}\n')
+
+                #First the data of the problem
+                newTexFileStatement.write('\\textbf{PROBLEMA ' + str(dictSavedStatement['idProblem']) + '} ')
+                if(prop):
+                    newTexFileStatement.write('\\textit{Propuesto por ' + prop + '}')
+                if(mag):
+                    newTexFileStatement.write('\\textit{Publicado en ' + mag + '}')
+                newTexFileStatement.write('\\medskip \n')
+
                 newTexFileStatement.write(statementTex + '\n')
 
                 # We end the document
@@ -440,37 +452,53 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 urlNewTex = dictSavedStatement['URL_PDF_Full'].rsplit('.', 1)[
                     0] + '.tex'
                 statementTex = dictSavedStatement['texProblem']
-                newTexFile = open(urlNewTex, "w+")
+                newTexFileFull = open(urlNewTex, "w+")
 
                 # We start the document
-                newTexFile.write('\\documentclass{article}\n')
+                newTexFileFull.write('\\documentclass[12pt]{article}\n')
 
                 # We write the packages
 
                 if(dictSavedStatement['packagesWithOptions']):
                     for tuplePackage in dictSavedStatement['packagesWithOptions']:
-                        newTexFile.write(
+                        newTexFileFull.write(
                             '\\usepackage[' + tuplePackage[0] + ']{' + tuplePackage[1] + '}\n')
 
                 if(dictSavedStatement['packagesWithoutOptions']):
                     for package in dictSavedStatement['packagesWithoutOptions']:
-                        newTexFile.write('\\usepackage{' + package + '}\n')
+                        newTexFileFull.write('\\usepackage{' + package + '}\n')
+
+                # We state the styles directives
+                newTexFileFull.write('\\setlength{\\parindent}{0pt}\n')
 
                 # We write the statement
-                newTexFile.write('\\begin{document}\n')
-                newTexFile.write(statementTex + '\n')
+                newTexFileFull.write('\\begin{document}\n')
+
+                #First the data of the problem
+                newTexFileFull.write('\\textbf{PROBLEMA ' + str(dictSavedStatement['idProblem']) + '} ')
+                if(prop):
+                    newTexFileFull.write('\\textit{Propuesto por ' + prop + '}')
+                if(mag):
+                    newTexFileFull.write('\\textit{Publicado en ' + mag + '}')
+                newTexFileFull.write('\\medskip \n')
+
+                newTexFileFull.write(statementTex + '\n')
 
                 # We write each solution
                 for counter, DictSavedSolu in enumerate(listDictSavedSolu):
                     solutionTex = DictSavedSolu['texSolu']
-                    newTexFile.write(
-                        '\\textbf{Solution ' + str(counter+1) + '}\\\\\n')
-                    newTexFile.write(solutionTex)
+                    solver = DictSavedSolu['solver']
+                    newTexFileFull.write('\\textbf{Solución ' + str(counter+1) + '.}')
+                    if(solver):
+                        newTexFileFull.write('\\textit{ Enviada por: ' + solver + '}')                   
+                    newTexFileFull.write('\\\\\n')
+                    newTexFileFull.write(solutionTex)
+                    newTexFileFull.write('\\medskip')
 
                 # We end the document
-                newTexFile.write('\\end{document}')
-                newTexFile.flush()
-                newTexFile.close()
+                newTexFileFull.write('\\end{document}')
+                newTexFileFull.flush()
+                newTexFileFull.close()
 
                 # We compile the new .tex
                 # We compile it twice just in case we need some references
@@ -638,7 +666,7 @@ def getProblemSheet(con, dictionaryProblems):
         newTexFile = open(urlNewTex, "w+")
 
         # We start the document
-        newTexFile.write('\\documentclass{article}\n')
+        newTexFile.write('\\documentclass[12pt]{article}\n')
 
         # We write the packages
         for package in packages:
@@ -652,6 +680,17 @@ def getProblemSheet(con, dictionaryProblems):
 
         newTexFile.write('\\begin{document}\n')
 
+        #We set the styling for the page problem
+        newTexFile.write('\\frenchspacing\n')
+        newTexFile.write('\\leftline{\\sf\\bfseries \\large Hoja de problemas. Generada con ProbleMath}\n')
+        newTexFile.write('\\medskip\n')
+        newTexFile.write('\\hrule\n')
+        newTexFile.write('\\bigskip\n')
+        newTexFile.write('\\vskip.5cm\n')
+        newTexFile.write('\\newcounter{ejem}\n')
+        newTexFile.write('\\begin{list}{\\sf\\bfseries\\arabic{ejem}.}\n')
+        newTexFile.write('{\\usecounter{ejem}\\leftmargin 0pt}\n')
+
         for n in range(1, numProblems+1):
             # We get the problem id
             problem_id = dictionaryProblems.get('problem'+str(n))
@@ -661,7 +700,7 @@ def getProblemSheet(con, dictionaryProblems):
 
             # We write the problem in if it exits
             if(auxTex):
-                newTexFile.write(auxTex + '\n')
+                newTexFile.write('\\item ' + auxTex + '\n')
 
             # We get the solutions id
             solution_ids = dictionaryProblems.get('solution'+str(n))
@@ -676,12 +715,13 @@ def getProblemSheet(con, dictionaryProblems):
 
                 # We write the solution
                 if(auxTex):
-                    newTexFile.write(
-                        '\\textbf{Solution ' + str(solutionsCounter) + '}\\\\\n')
+                    newTexFile.write('\\emph{Solución ' + str(solutionsCounter) +'.}\\\\\n')
                     newTexFile.write(auxTex + '\n')
+                    newTexFile.write('\\medskip')
                     solutionsCounter = solutionsCounter + 1
 
         # We end the document
+        newTexFile.write('\\end{list}\n')
         newTexFile.write('\\end{document}')
         newTexFile.flush()
         newTexFile.close()

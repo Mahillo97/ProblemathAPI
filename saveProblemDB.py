@@ -374,10 +374,6 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 else:
                     texSolu =  texSolu + line[:indexComment] + '\n'
 
-        print('************************************************************************')
-        print(texSolu + '\r\n')
-        print('************************************************************************')
-
         tupleValuesSolu = tupleValuesSolu + (idProblem, texSolu, 0)
 
         if(solver):
@@ -406,7 +402,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 mycursorUpdateDependencies.execute(
                     sqlQueryUpdateDependencies, (idSolu, idDep))
 
-        return dict(idSolu=idSolu, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution)
+        return dict(idSolu=idSolu, solver=solver, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution)
 
     except mySQLException as e:
         con.rollback()
