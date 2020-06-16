@@ -190,20 +190,21 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
         mycursorTags = con.cursor(prepared=True)
 
         if(tags):
-            list_tags = tags.split(",")
+            list_tags = [x.strip() for x in tags.split(',')]
             sqlQueryFindTag = 'SELECT Id FROM tag WHERE Name = %s '
             sqlQueryNewTags = 'INSERT INTO tag (Name) VALUES (%s)'
             sqlQueryTags = 'INSERT INTO problem_tag (Id_Problem,Id_Tag) VALUES (%s,%s)'
             for tag in list_tags:
-                idTag = None
-                mycursorFindTag.execute(sqlQueryFindTag, (tag,))
-                row = mycursorFindTag.fetchone()
-                if row is None:
-                    mycursorNewTag.execute(sqlQueryNewTags, (tag,))
-                    idTag = mycursorNewTag.lastrowid
-                else:
-                    idTag = row[0]
-                mycursorTags.execute(sqlQueryTags, (idProblem, idTag))
+                if(tag):
+                    idTag = None
+                    mycursorFindTag.execute(sqlQueryFindTag, (tag,))
+                    row = mycursorFindTag.fetchone()
+                    if row is None:
+                        mycursorNewTag.execute(sqlQueryNewTags, (tag,))
+                        idTag = mycursorNewTag.lastrowid
+                    else:
+                        idTag = row[0]
+                    mycursorTags.execute(sqlQueryTags, (idProblem, idTag))
 
         mycursorFindTag.close()
         mycursorNewTag.close()
