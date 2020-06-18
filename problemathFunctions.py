@@ -35,16 +35,20 @@ def getProblemList(con, tags, mag, prop, tamPag, pag):
             sqlQueryWhere = 'WHERE '
             if(tags):
                 list_tags = tags.split(",")
+                #We remove the empty tags
+                list_tags = [tag for tag in list_tags if tag]
+                #We set the any string before and after the tag
+                list_tags = ["%" + tag + "%" for tag in list_tags]
                 tuple_values = tuple_values + tuple(list_tags)
                 for i in range(len(list_tags)):
                     if len(list_tags) == 1:
-                        sqlQueryWhere = sqlQueryWhere + '(T.Name=%s) '
+                        sqlQueryWhere = sqlQueryWhere + '(T.Name LIKE %s) '
                     elif i == 0:
-                        sqlQueryWhere = sqlQueryWhere + '(T.Name=%s '
+                        sqlQueryWhere = sqlQueryWhere + '(T.Name LIKE %s '
                     elif i == len(list_tags)-1:
-                        sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s) '
+                        sqlQueryWhere = sqlQueryWhere + 'or T.Name LIKE %s) '
                     else:
-                        sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s '
+                        sqlQueryWhere = sqlQueryWhere + 'or T.Name LIKE %s '
             if(mag):
                 if(tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
@@ -100,16 +104,20 @@ def getProblemListSize(con, tags, mag, prop):
             sqlQueryWhere = 'WHERE '
             if(tags):
                 list_tags = tags.split(",")
+                #We remove the empty tags
+                list_tags = [tag for tag in list_tags if tag]
+                #We set the any string before and after the tag
+                list_tags = ["%" + tag + "%" for tag in list_tags]
                 tuple_values = tuple_values + tuple(list_tags)
                 for i in range(len(list_tags)):
                     if len(list_tags) == 1:
-                        sqlQueryWhere = sqlQueryWhere + '(T.Name=%s) '
+                        sqlQueryWhere = sqlQueryWhere + '(T.Name LIKE %s) '
                     elif i == 0:
-                        sqlQueryWhere = sqlQueryWhere + '(T.Name=%s '
+                        sqlQueryWhere = sqlQueryWhere + '(T.Name LIKE %s '
                     elif i == len(list_tags)-1:
-                        sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s) '
+                        sqlQueryWhere = sqlQueryWhere + 'or T.Name LIKE %s) '
                     else:
-                        sqlQueryWhere = sqlQueryWhere + 'or T.Name=%s '
+                        sqlQueryWhere = sqlQueryWhere + 'or T.Name LIKE %s '
             if(mag):
                 if(tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
