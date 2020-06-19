@@ -479,14 +479,10 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 newTexFileStatementWEB = open(urlNewTexStatementWEB, "w+")
 
                 # We start the document
-<<<<<<< HEAD
-                newTexFileStatement.write('\\documentclass[12pt]{article}\n')
-=======
                 newTexFileStatementPDF.write(
                     '\\documentclass[12pt]{article}\n')
                 newTexFileStatementWEB.write(
                     '\\documentclass[12pt]{article}\n')
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
 
                 # We write the packages
 
@@ -527,22 +523,8 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 newTexFileStatement.write('\\setlength{\\parindent}{0pt}\n')
 
                 # We write the statement
-<<<<<<< HEAD
-                newTexFileStatement.write('\\begin{document}\n')
-
-                #First the data of the problem
-                newTexFileStatement.write('\\textbf{PROBLEMA ' + str(dictSavedStatement['idProblem']) + '} ')
-                if(prop):
-                    newTexFileStatement.write('\\textit{Propuesto por ' + prop + '}')
-                if(mag):
-                    newTexFileStatement.write('\\textit{Publicado en ' + mag + '}')
-                newTexFileStatement.write('\\medskip \n')
-
-                newTexFileStatement.write(statementTex + '\n')
-=======
                 newTexFileStatementPDF.write(statementTex + '\n')
                 newTexFileStatementWEB.write(statementTex + '\n')
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
 
                 # We end the document
                 newTexFileStatementPDF.write('\\end{document}')
@@ -615,46 +597,24 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 # We write the statement
                 newTexFileFull.write('\\begin{document}\n')
 
-<<<<<<< HEAD
-                #First the data of the problem
-                newTexFileFull.write('\\textbf{PROBLEMA ' + str(dictSavedStatement['idProblem']) + '} ')
-                if(prop):
-                    newTexFileFull.write('\\textit{Propuesto por ' + prop + '}')
-=======
                 # First the data of the problem
                 newTexFileFull.write(
                     '\\textbf{PROBLEMA ' + str(dictSavedStatement['idProblem']) + '} ')
                 if(prop):
                     newTexFileFull.write(
                         '\\textit{Propuesto por ' + prop + '}')
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
                 if(mag):
                     newTexFileFull.write('\\textit{Publicado en ' + mag + '}')
                 newTexFileFull.write('\\medskip \n')
 
                 newTexFileFull.write(statementTex + '\n')
-<<<<<<< HEAD
-=======
 
                 #Var to check error
                 errorCodeFull = 0
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
 
                 # We write each solution
                 # We create an html for each solution             
                 for counter, DictSavedSolu in enumerate(listDictSavedSolu):
-<<<<<<< HEAD
-                    solutionTex = DictSavedSolu['texSolu']
-                    solver = DictSavedSolu['solver']
-                    newTexFileFull.write('\\textbf{Solución ' + str(counter+1) + '.}')
-                    if(solver):
-                        newTexFileFull.write('\\textit{ Enviada por: ' + solver + '}')                   
-                    newTexFileFull.write('\\\\\n')
-                    newTexFileFull.write(solutionTex)
-                    newTexFileFull.write('\\medskip')
-
-                # We end the document
-=======
 
                     #We create the directory
                     cliMakeDirSoluID = 'mkdir ' + DATA_DIRECTORY + \
@@ -731,7 +691,6 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     os.remove(urlAuxSolutionTex)
 
                 # We end the main document
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
                 newTexFileFull.write('\\end{document}')
                 newTexFileFull.flush()
                 newTexFileFull.close()
@@ -917,16 +876,10 @@ def getProblemSheet(con, dictionaryProblems):
 
         newTexFile.write('\\begin{document}\n')
 
-<<<<<<< HEAD
-        #We set the styling for the page problem
-        newTexFile.write('\\frenchspacing\n')
-        newTexFile.write('\\leftline{\\sf\\bfseries \\large Hoja de problemas. Generada con ProbleMath}\n')
-=======
         # We set the styling for the page problem
         newTexFile.write('\\frenchspacing\n')
         newTexFile.write(
             '\\leftline{\\sf\\bfseries \\large Hoja de problemas. Generada con ProbleMath}\n')
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
         newTexFile.write('\\medskip\n')
         newTexFile.write('\\hrule\n')
         newTexFile.write('\\bigskip\n')
@@ -959,12 +912,8 @@ def getProblemSheet(con, dictionaryProblems):
 
                 # We write the solution
                 if(auxTex):
-<<<<<<< HEAD
-                    newTexFile.write('\\emph{Solución ' + str(solutionsCounter) +'.}\\\\\n')
-=======
                     newTexFile.write(
                         '\\emph{Solución ' + str(solutionsCounter) + '.}\\\\\n')
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
                     newTexFile.write(auxTex + '\n')
                     newTexFile.write('\\medskip')
                     solutionsCounter = solutionsCounter + 1

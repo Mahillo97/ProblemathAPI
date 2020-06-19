@@ -402,11 +402,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 mycursorUpdateDependencies.execute(
                     sqlQueryUpdateDependencies, (idSolu, idDep))
 
-<<<<<<< HEAD
-        return dict(idSolu=idSolu, solver=solver, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution)
-=======
         return dict(idSolu=idSolu, solver=solver, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution, URL_WEB=URL_WEB, dep=dep)
->>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
 
     except mySQLException as e:
         con.rollback()
