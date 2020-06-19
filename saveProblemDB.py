@@ -76,18 +76,10 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                 oldRelativePathExt = oldRelativePath.split(".", 1)[1]
                 oldRelativePathName = oldRelativePath.split(".", 1)[0]
 
-                print(oldRelativePathName)
-                print(oldRelativePathExt)
-
                 regexReplace1 = r'\{.*?' + re.escape(
                     oldRelativePathName) + r'\.' + re.escape(oldRelativePathExt) + r'.*?\}'
                 regexReplace2 = r'\{.*?' + \
                     re.escape(oldRelativePathName) + r'.*?\}'
-
-                print(regexReplace1)
-                print(regexReplace2)
-
-                print(newPath)
 
                 texStatement = re.sub(
                     regexReplace1, '{' + newPath + '}', texStatement)
@@ -98,8 +90,8 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
             dep = 0
 
         # Check tha variables to create the Query String
-        sqlQueryBeginningStatement = 'INSERT INTO problem (Tex, URL_PDF_State, URL_PDF_Full, Dep_State'
-        sqlQueryValues = 'VALUES (%s, %s, %s, %s'
+        sqlQueryBeginningStatement = 'INSERT INTO problem (Tex, URL_PDF_State, URL_PDF_Full, URL_WEB, Dep_State'
+        sqlQueryValues = 'VALUES (%s, %s, %s, %s, %s'
         tupleValuesStatement = ()
 
         # We read the file
@@ -153,7 +145,7 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                     texStatement =  texStatement + line[:indexComment] + '\n'
 
         tupleValuesStatement = tupleValuesStatement + \
-            (texStatement, 'placeholder', 'placeholder', dep)
+            (texStatement, 'placeholder', 'placeholder', 'placeholder', dep)
 
         if(mag):
             sqlQueryBeginningStatement = sqlQueryBeginningStatement + ', Magazine'
@@ -177,10 +169,11 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
 
         # We update the placeholders
         mycursorUpdate = con.cursor(prepared=True)
-        sqlQueryUpdate = 'UPDATE problem SET URL_PDF_State=%s, URL_PDF_Full=%s WHERE id=%s'
+        sqlQueryUpdate = 'UPDATE problem SET URL_PDF_State=%s, URL_PDF_Full=%s, URL_WEB=%s WHERE id=%s'
         URL_PDF_State = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfState.pdf'
         URL_PDF_Full = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfFull.pdf'
-        tupleValuesUpdate = (URL_PDF_State, URL_PDF_Full, idProblem)
+        URL_WEB = DATA_DIRECTORY+'/'+str(idProblem)+'/web/statement/statement.html'
+        tupleValuesUpdate = (URL_PDF_State, URL_PDF_Full, URL_WEB, idProblem)
         mycursorUpdate.execute(sqlQueryUpdate, tupleValuesUpdate)
         mycursorUpdate.close()
 
@@ -261,8 +254,8 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                     sqlQueryUpdateDependencies, (idProblem, idDep))
 
         return dict(idProblem=idProblem, absoluteURL=absoluteURL, URL_PDF_State=URL_PDF_State,
-                    URL_PDF_Full=URL_PDF_Full, texProblem=texStatement, packagesWithoutOptions=packagesWithoutOptions,
-                    packagesWithOptions=packagesWithOptions)
+                    URL_PDF_Full=URL_PDF_Full,URL_WEB=URL_WEB, texProblem=texStatement, packagesWithoutOptions=packagesWithoutOptions,
+                    packagesWithOptions=packagesWithOptions, dep = dep)
 
     except mySQLException as e:
         con.rollback()
@@ -341,8 +334,8 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
             dep = 0
 
         # Check tha variables to create the Query String
-        sqlQueryBeginningSolu = 'INSERT INTO solution (Id_Problem, Tex, Dep_Solu'
-        sqlQueryValuesSolu = 'VALUES (%s, %s, %s'
+        sqlQueryBeginningSolu = 'INSERT INTO solution (Id_Problem, Tex, Dep_Solu, URL_WEB'
+        sqlQueryValuesSolu = 'VALUES (%s, %s, %s, %s'
         tupleValuesSolu = ()
 
         # We read the file
@@ -357,7 +350,6 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
         texSolu = ''
         #We remove the comments
         for line in texSoluLines:
-            print(line + '\n')
             if line.find('%') == -1 :
                 texSolu = texSolu + line + '\n'
             elif line.find('/%') != -1:
@@ -374,7 +366,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 else:
                     texSolu =  texSolu + line[:indexComment] + '\n'
 
-        tupleValuesSolu = tupleValuesSolu + (idProblem, texSolu, 0)
+        tupleValuesSolu = tupleValuesSolu + (idProblem, texSolu, 0, 'placeholder')
 
         if(solver):
             sqlQueryBeginningSolu = sqlQueryBeginningSolu + ', Solver'
@@ -392,6 +384,14 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
         idSolu = mycursorSolu.lastrowid
         mycursorSolu.close()
 
+        # Update the placehodlers
+        mycursorUpdateWeb = con.cursor(prepared=True)
+        sqlQueryUpdateWeb = 'UPDATE solution SET URL_WEB=%s WHERE id=%s'
+        URL_WEB = DATA_DIRECTORY+'/'+str(idProblem)+'/web/solutions/'+ str(idSolu)+'/solution.html'
+        tupleValuesUpdateWeb = (URL_WEB, idSolu)
+        mycursorUpdateWeb.execute(sqlQueryUpdateWeb, tupleValuesUpdateWeb)
+        mycursorUpdateWeb.close()
+
         # We must update the dependency table to update the foreign keys
         if(dep == 1):
             mycursorUpdateDependencies = con.cursor(prepared=True)
@@ -402,7 +402,11 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 mycursorUpdateDependencies.execute(
                     sqlQueryUpdateDependencies, (idSolu, idDep))
 
+<<<<<<< HEAD
         return dict(idSolu=idSolu, solver=solver, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution)
+=======
+        return dict(idSolu=idSolu, solver=solver, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution, URL_WEB=URL_WEB, dep=dep)
+>>>>>>> d902a9b06f528afdbbbd39ba0d4fd9c9514705ca
 
     except mySQLException as e:
         con.rollback()

@@ -271,7 +271,7 @@ class problemPDFFull(Resource):
 ****************************************************************************************************"""
 
 
-class dependency(Resource):
+class resourceDependency(Resource):
     def get(self, dependency_id):
 
         # Select in the database the info for the selected problem
@@ -281,10 +281,12 @@ class dependency(Resource):
             dependency_id = int(dependency_id)
             con = dbConnectMySQL()
             urlImage = problemathFunctions.getDependency(con, dependency_id)
-            imageName = urlImage.split("/")[-1]
-            imageDirectory = urlImage[:urlImage.rindex("/")]
-            return send_from_directory(imageDirectory, imageName)
-
+            if(urlImage):
+                imageName = urlImage.split("/")[-1]
+                imageDirectory = urlImage[:urlImage.rindex("/")]
+                return send_from_directory(imageDirectory, imageName)
+            else:
+                abort(404)
         except ValueError:
             abort(400)
         except mySQLException:
@@ -590,7 +592,9 @@ api.add_resource(problemQueryListSize, '/users/problems/size')
 api.add_resource(problemQuery, '/users/problem/<problem_id>')
 api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
 api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
-api.add_resource(dependency, '/users/dependency/<dependency_id>')
+api.add_resource(resourceDependency, '/users/resource/image/<dependency_id>')
+#api.add_resource(resourceHtmlStatement, '/users/resource/html/problem/<problem_id>')
+#api.add_resource(resourceHtmlSolution, '/users/resource/html/solution/<solution_id>')
 api.add_resource(getProblemSheet, '/users/getProblemSheet')
 api.add_resource(uploadProblem, '/admin/uploadProblem')
 api.add_resource(removeProblem, '/admin/removeProblem/<problem_id>')

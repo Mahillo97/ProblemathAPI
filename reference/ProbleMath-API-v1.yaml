@@ -1,0 +1,1118 @@
+openapi: 3.0.0
+info:
+  title: Problemath API REST
+  version: '1.0'
+  description: API REST to get information about the database of the Problemath Web Service.
+  contact:
+    name: Alejandro Mahillo
+  license:
+    name: MIT
+tags:
+  - name: List
+  - name: Admin
+  - name: Users
+  - name: Problem
+  - name: PDF
+servers:
+  - url: 'http://localhost:5000'
+paths:
+  /users/problems:
+    get:
+      summary: Problems based in a query string
+      description: Problems based in a query string
+      tags:
+        - Users
+        - Problem
+        - List
+      parameters:
+        - name: tags
+          in: query
+          description: List of tags separated by commas
+          required: false
+          schema:
+            type: string
+          allowEmptyValue: true
+        - name: mag
+          in: query
+          description: Magazine name
+          required: false
+          schema:
+            type: string
+        - name: prop
+          in: query
+          description: Proposer name
+          required: false
+          schema:
+            type: string
+        - name: tamPag
+          in: query
+          description: Size of pages of the result
+          required: false
+          schema:
+            type: integer
+        - name: pag
+          in: query
+          description: Number page that we need
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of problems according with the query
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  problems:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProblemBasic'
+              examples:
+                Result of a correct search:
+                  value:
+                    problems:
+                      - id: 10
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 11
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 12
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 15
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 21
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                Result when you exceed the maximum page or there are no problems:
+                  value:
+                    problems: []
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"The browser (or proxy) sent a request that this server could not understand."'
+              examples:
+                Bad Request Example:
+                  value:
+                    message: The browser (or proxy) sent a request that this server could not understand.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: get-users-problems
+  '/users/problem/{problem_id}/pdfState':
+    get:
+      summary: Problem Statement PDF
+      description: Download the statement of a problem as PDF.
+      tags:
+        - Users
+        - Problem
+        - PDF
+      parameters: []
+      responses:
+        '200':
+          description: 'Statement of a problem as a PDF '
+          content:
+            application/pdf:
+              schema: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"The browser (or proxy) sent a request that this server could not understand."'
+              examples:
+                Bad Request Example:
+                  value:
+                    message: The browser (or proxy) sent a request that this server could not understand.
+        '404':
+          description: "The problem_id doesn't exists in the database"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Not Found Example:
+                  value:
+                    message: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: get-users-problem-id-pdfState
+    parameters:
+      - schema:
+          type: integer
+          minimum: 0
+        name: problem_id
+        in: path
+        required: true
+  '/users/problem/{problem_id}/pdfFull':
+    get:
+      summary: Problem Statement PDF
+      description: Download the statement and solutions of a problem as PDF.
+      tags:
+        - Users
+        - Problem
+        - PDF
+      parameters: []
+      responses:
+        '200':
+          description: 'Statement and solutions of a problem as a PDF '
+          content:
+            application/pdf:
+              schema: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"The browser (or proxy) sent a request that this server could not understand."'
+              examples:
+                Bad Request Example:
+                  value:
+                    message: The browser (or proxy) sent a request that this server could not understand.
+        '404':
+          description: "The problem_id doesn't exists in the database"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Not Found Example:
+                  value:
+                    message: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: get-users-problem-id-pdfFull
+    parameters:
+      - schema:
+          type: integer
+          minimum: 0
+        name: problem_id
+        in: path
+        required: true
+  '/users/dependency/{dependency_id}':
+    get:
+      summary: Dependency for HTML visualization
+      description: 'It returns the image with that id it can be a png, svg or jpg.'
+      tags:
+        - Users
+      parameters: []
+      responses:
+        '200':
+          description: The image associated with that id
+          content:
+            image/svg+xml+jpg+png:
+              schema:
+                type: object
+                properties:
+                  problems:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProblemBasic'
+              examples:
+                Result of a correct search:
+                  value:
+                    problems:
+                      - id: 10
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 11
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 12
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 15
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 21
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                Result when you exceed the maximum page or there are no problems:
+                  value:
+                    problems: []
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"The browser (or proxy) sent a request that this server could not understand."'
+              examples:
+                Bad Request Example:
+                  value:
+                    message: The browser (or proxy) sent a request that this server could not understand.
+        '404':
+          description: "The dependency_id doesn't exists in the database"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Not Found Example:
+                  value:
+                    message: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: get-users-dependency
+    parameters:
+      - schema:
+          type: integer
+          minimum: 0
+        name: dependency_id
+        in: path
+        required: true
+  /users/getProblemSheet:
+    get:
+      summary: Problem Sheet
+      description: Problem sheet created based on a list of problems and solutions. In the query params you can write a total of 10 problems. In future version this limit will be increased.
+      tags:
+        - Users
+        - Problem
+        - PDF
+      parameters:
+        - name: problem1
+          in: query
+          description: Problem_id
+          required: false
+          schema:
+            type: integer
+          allowEmptyValue: true
+        - name: solution1
+          in: query
+          description: 'List of solutions_id separated by commas. Required if problem1 appears, but it can be empty.'
+          required: false
+          schema:
+            type: string
+            example: '12,13'
+          allowEmptyValue: true
+        - name: problem2
+          in: query
+          description: Second problem
+          required: false
+          schema:
+            type: integer
+        - name: solution2
+          in: query
+          description: Second list of solutions
+          required: false
+          schema:
+            type: string
+            example: '18'
+          allowEmptyValue: true
+      responses:
+        '200':
+          description: Problem sheet generated as PDF
+          content:
+            application/pdf:
+              schema: {}
+              examples: {}
+        '400':
+          description: Bad Request if you send invalid paramas or if the compilation fails.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"The browser (or proxy) sent a request that this server could not understand."'
+              examples:
+                Bad Request when the params are unvalid:
+                  value:
+                    message: Unvalid params
+                Bad Request when the compilation fails:
+                  value:
+                    message: Compile problems
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: get-users-problem-sheet
+    parameters: []
+  /ping:
+    get:
+      summary: Ping
+      description: Pings the API to know if authentication has been succesful.
+      tags:
+        - Admin
+      parameters: []
+      responses:
+        '200':
+          description: List of problems according with the query
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Result of a correct search:
+                  value:
+                    problems:
+                      - id: 10
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 11
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 12
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 15
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 21
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                Result when you exceed the maximum page or there are no problems:
+                  value:
+                    problems: []
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: ping
+      security:
+        - Admin-Login: []
+    parameters: []
+  '/admin/removeProblem/{problem_id}':
+    post:
+      tags:
+        - Admin
+        - Problem
+      summary: Remove Problem
+      operationId: post-admin-removeProblem
+      responses:
+        '200':
+          description: Problem deleted correctly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Response Example:
+                  value:
+                    message: 'The problem {problem_id} was deleted correctly.'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                The id must be an integer:
+                  value:
+                    message: The browser (or proxy) sent a request that this server could not understand.
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Not Found Example:
+                  value:
+                    message: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                'Internal Server Error ':
+                  value:
+                    message: Internal Server Error
+      description: Removes the problem with id problem_id from the database.
+      security:
+        - Admin-Login: []
+    parameters:
+      - schema:
+          type: integer
+          minimum: 0
+        name: problem_id
+        in: path
+        required: true
+  /admin/addUser:
+    post:
+      tags:
+        - Admin
+        - Problem
+      summary: Add User
+      operationId: post-admin-addUser
+      responses:
+        '200':
+          description: Problem uploaded correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Response Example:
+                  value:
+                    message: User added to the database
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                User already added to the database:
+                  value:
+                    message: There is already an username with this name in the database
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                'Internal Server Error ':
+                  value:
+                    message: Internal Server Error
+      description: We add a new user to the database.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                  description: New admin name
+                pwd:
+                  type: string
+                  description: Password of the admin
+        description: ''
+  /admin/changePassword:
+    post:
+      tags:
+        - Admin
+        - Problem
+      summary: Change Password
+      operationId: post-admin-changePassword
+      responses:
+        '200':
+          description: Password changed correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Response Example:
+                  value:
+                    message: User password changed correctly
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                The user from the Auth Token is the same as the param:
+                  value:
+                    message: "You don't have the permission to access the requested resource. It is either read-protected or not readable by the server."
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                'Internal Server Error ':
+                  value:
+                    message: Internal Server Error
+      description: Changes the password of the user that has logged in.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                  description: "User that will change it's password"
+                pwd:
+                  type: string
+                  description: New password
+        description: ''
+  /admin/uploadProblem:
+    post:
+      tags:
+        - Admin
+        - Problem
+      summary: Upload Problem
+      operationId: post-admin-uploadProblem
+      responses:
+        '200':
+          description: Problem uploaded correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Response Example:
+                  value:
+                    message: Problem uploaded correctly.
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Error with the params:
+                  value:
+                    message: Error with the parameters
+                Error saving the documents:
+                  value:
+                    message: Error with the parameters
+                Error compiling the Latex:
+                  value:
+                    message: Errors compiling the Latex
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                'Internal Server Error ':
+                  value:
+                    message: Internal Server Error
+      description: Uploads a problem to the database
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                prop:
+                  type: string
+                  description: Proposer of the problem
+                mag:
+                  type: string
+                  description: Magazine where it has been published
+                tags:
+                  type: string
+                  description: Tags separated by commas
+                problem:
+                  type: string
+                  format: binary
+                  description: Statement in .tex or .zip extension
+                solution1:
+                  type: string
+                  format: binary
+                  description: Solution in .tex or .zip extension
+                solver1:
+                  type: string
+                  description: Solver of the solution 1
+        description: |
+          We upload a problem to the database. There must be a problem param and at least 1 solution, with or without solver. Then you can add as many solutions as you want until tou reach 10 solutions which is the max.
+
+          If you send a .zip it must have the followinf schema:
+          file.zip
+             |
+             |--- latex_file.tex
+             |
+             |--- picture1(.png,.pdf,.jpg)
+             |
+             |--- picture2(.png,.pdf,.jpg)
+             |
+          and so on...
+  '/users/problem/{problem_id}':
+    get:
+      summary: Problem Info
+      description: Problems based in a query string
+      tags:
+        - Users
+        - Problem
+      parameters: []
+      responses:
+        '200':
+          description: Data of a problem
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  problems:
+                    $ref: '#/components/schemas/Problem'
+              examples:
+                Result of a correct search:
+                  value:
+                    problems:
+                      - id: 10
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 11
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                      - id: 12
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 15
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                      - id: 21
+                        magazine: Gaceta Matemática Española
+                        proposer: Florin Stunescu
+                        tags:
+                          - análisis
+                          - desigualdad
+                          - integral
+                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
+                Result when you exceed the maximum page or there are no problems:
+                  value:
+                    problems: []
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"The browser (or proxy) sent a request that this server could not understand."'
+              examples:
+                Bad Request Example:
+                  value:
+                    message: The browser (or proxy) sent a request that this server could not understand.
+        '404':
+          description: "The problem_id doesn't exists in the database"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              examples:
+                Not Found Example:
+                  value:
+                    message: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: get-users-problem-id
+    parameters:
+      - schema:
+          type: string
+        name: problem_id
+        in: path
+        required: true
+  /users/problems/size:
+    get:
+      summary: Problem Query Size
+      description: Number of problems based in a query string
+      tags:
+        - Users
+        - Problem
+        - List
+      parameters:
+        - name: tags
+          in: query
+          description: List of tags separated by commas
+          required: false
+          schema:
+            type: string
+          allowEmptyValue: true
+        - name: mag
+          in: query
+          description: Magazine name
+          required: false
+          schema:
+            type: string
+        - name: prop
+          in: query
+          description: Proposer name
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Number of problems of th query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  size:
+                    type: integer
+                    minimum: 0
+              examples:
+                Example with a non-empty list:
+                  value:
+                    size: 5
+                Example with an empty list:
+                  value:
+                    size: 0
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"The browser (or proxy) sent a request that this server could not understand."'
+              examples:
+                Bad Request Example:
+                  value:
+                    message: The browser (or proxy) sent a request that this server could not understand.
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    enum:
+                      - '"Internal Server Error"'
+              examples:
+                Internal Server Error Example:
+                  value:
+                    message: Internal Server Error
+      operationId: get-users-problems-size
+components:
+  schemas:
+    Problem:
+      title: Problem
+      type: object
+      required:
+        - id
+        - magazine
+        - proposer
+        - tags
+        - tex
+      properties:
+        id:
+          type: integer
+          format: int32
+        magazine:
+          type: string
+        proposer:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        tex:
+          type: string
+        solutions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Solution'
+        dep_state:
+          type: integer
+          minimum: 0
+          maximum: 1
+    Solution:
+      title: Solution
+      type: object
+      required:
+        - id
+        - solver
+        - tex
+      properties:
+        id:
+          type: integer
+        solver:
+          type: string
+        tex:
+          type: string
+    ProblemBasic:
+      title: Problem
+      type: object
+      required:
+        - id
+        - magazine
+        - proposer
+        - tags
+        - tex
+      properties:
+        id:
+          type: integer
+          format: int32
+        magazine:
+          type: string
+        proposer:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        tex:
+          type: string
+  securitySchemes:
+    Admin-Login:
+      type: http
+      scheme: basic
