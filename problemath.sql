@@ -83,9 +83,11 @@ CREATE TABLE `problem` (
   `Dep_State` tinyint(4) NOT NULL,
   `URL_PDF_State` varchar(100) NOT NULL,
   `URL_PDF_Full` varchar(100) NOT NULL,
+  `URL_WEB` varchar(100) NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `URL_PDF_State_UNIQUE` (`URL_PDF_State`),
-  UNIQUE KEY `URL_PDF_Full_UNIQUE` (`URL_PDF_Full`)
+  UNIQUE KEY `URL_PDF_Full_UNIQUE` (`URL_PDF_Full`),
+  UNIQUE KEY `URL_WEB_UNIQUE` (`URL_WEB`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -168,7 +170,9 @@ CREATE TABLE `solution` (
   `Tex` mediumtext NOT NULL,
   `Solver` varchar(50) DEFAULT NULL,
   `Dep_Solu` tinyint(4) NOT NULL,
+  `URL_WEB` varchar(100) NOT NULL,
   PRIMARY KEY (`Id`),
+  UNIQUE KEY `URL_WEB_UNIQUE` (`URL_WEB`),
   KEY `FK_SOLUTION_PROBLEM_idx` (`Id_Problem`),
   CONSTRAINT `FK_SOLUTION_PROBLEM` FOREIGN KEY (`Id_Problem`) REFERENCES `problem` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
