@@ -264,7 +264,7 @@ class problemPDFFull(Resource):
             except mySQLException:
                 log.exception('Unable to close connection')
 
-                """****************************************************************************************************
+"""****************************************************************************************************
 * Description: method to return the current servs of a client in the database
 * INPUT: customer id
 * OUTPUT: a JSON with the servs of the client
@@ -298,6 +298,90 @@ class resourceDependency(Resource):
                     con.close()
             except mySQLException:
                 log.exception('Unable to close connection')
+
+"""****************************************************************************************************
+* Description: method to return the current servs of a client in the database
+* INPUT: customer id
+* OUTPUT: a JSON with the servs of the client
+****************************************************************************************************"""
+
+
+class resourceHtmlStatement(Resource):
+    def get(self, problem_id):
+
+        # Select in the database the info for the selected problem
+        con = None
+        try:
+            # Check if problem is an int
+            problem_id = int(problem_id)
+            con = dbConnectMySQL()
+            urlWeb = problemathFunctions.getHTMLStatement(con, problem_id)
+            if(urlWeb):
+                HTMLName = urlWeb.split("/")[-1]
+                HTMLDirectory = urlWeb[:urlWeb.rindex("/")]
+                return send_from_directory(HTMLDirectory, HTMLName)
+            else:
+                abort(404)
+        except ValueError:
+            abort(400)
+        except mySQLException:
+            log.exception('mySQL Exception')
+            abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
+
+"""****************************************************************************************************
+* Description: method to return the current servs of a client in the database
+* INPUT: customer id
+* OUTPUT: a JSON with the servs of the client
+****************************************************************************************************"""
+
+
+class resourceHtmlSolution(Resource):
+    def get(self, solution_id):
+
+        # Select in the database the info for the selected solution
+        con = None
+        try:
+            # Check if solution is an int
+            solution_id = int(solution_id)
+            con = dbConnectMySQL()
+            urlWeb = problemathFunctions.getHTMLSolution(con, solution_id)
+            if(urlWeb):
+                HTMLName = urlWeb.split("/")[-1]
+                HTMLDirectory = urlWeb[:urlWeb.rindex("/")]
+                return send_from_directory(HTMLDirectory, HTMLName)
+            else:
+                abort(404)
+        except ValueError:
+            abort(400)
+        except mySQLException:
+            log.exception('mySQL Exception')
+            abort(500)
+        finally:
+            try:
+                if(con is not None):
+                    con.close()
+            except mySQLException:
+                log.exception('Unable to close connection')
+
+
+"""****************************************************************************************************
+* Description: method to return the current servs of a client in the database
+* INPUT: customer id
+* OUTPUT: a JSON with the servs of the client
+****************************************************************************************************"""
+
+
+class resourceCSS(Resource):
+    def get(self):
+        CSSName = 'style.css'
+        CSSDirectory = 'Data/css'
+        return send_from_directory(CSSDirectory, CSSName)
 
 
 """****************************************************************************************************
@@ -593,8 +677,9 @@ api.add_resource(problemQuery, '/users/problem/<problem_id>')
 api.add_resource(problemPDFState, '/users/problem/<problem_id>/pdfState')
 api.add_resource(problemPDFFull, '/users/problem/<problem_id>/pdfFull')
 api.add_resource(resourceDependency, '/users/resource/image/<dependency_id>')
-#api.add_resource(resourceHtmlStatement, '/users/resource/html/problem/<problem_id>')
-#api.add_resource(resourceHtmlSolution, '/users/resource/html/solution/<solution_id>')
+api.add_resource(resourceHtmlStatement, '/users/resource/html/problem/<problem_id>')
+api.add_resource(resourceHtmlSolution, '/users/resource/html/solution/<solution_id>')
+api.add_resource(resourceCSS, '/users/resource/css')
 api.add_resource(getProblemSheet, '/users/getProblemSheet')
 api.add_resource(uploadProblem, '/admin/uploadProblem')
 api.add_resource(removeProblem, '/admin/removeProblem/<problem_id>')

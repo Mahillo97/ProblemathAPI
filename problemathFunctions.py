@@ -375,6 +375,59 @@ def getDependency(con, dependency_id):
     except mySQLException as e:
         raise e
 
+"""****************************************************************************************************
+* Description: method to return the current values of a client in the database
+* INPUT: customer id
+* OUTPUT: a JSON with the data client
+****************************************************************************************************"""
+
+
+def getHTMLStatement(con, dependency_id):
+
+    try:
+        # Check tha variables to create the Query String
+        sqlQuery = 'SELECT P.URL_WEB FROM problem as P WHERE P.Id = %s'
+
+        # Execute the query
+        mycursor = con.cursor(prepared=True)
+        mycursor.execute(sqlQuery, (dependency_id,))
+        html_data = mycursor.fetchone()
+        mycursor.close()
+
+        url = None
+        if(html_data):
+            url = html_data[0].decode("utf-8")
+        return url
+    except mySQLException as e:
+        raise e
+
+
+"""****************************************************************************************************
+* Description: method to return the current values of a client in the database
+* INPUT: customer id
+* OUTPUT: a JSON with the data client
+****************************************************************************************************"""
+
+
+def getHTMLSolution(con, dependency_id):
+
+    try:
+        # Check tha variables to create the Query String
+        sqlQuery = 'SELECT S.URL_WEB FROM solution as S WHERE S.Id = %s'
+
+        # Execute the query
+        mycursor = con.cursor(prepared=True)
+        mycursor.execute(sqlQuery, (dependency_id,))
+        html_data = mycursor.fetchone()
+        mycursor.close()
+
+        url = None
+        if(html_data):
+            url = html_data[0].decode("utf-8")
+        return url
+    except mySQLException as e:
+        raise e
+
 
 """****************************************************************************************************
 * Description: method to return the bills of a client
