@@ -2,6 +2,7 @@
 /Data/*
 !/Data/dp
 !/Data/tmp
+!/Data/css
 /Data/dp/*
 /Data/tmp/*
 /__pycache__/*
