@@ -369,7 +369,7 @@ def getDependency(con, dependency_id):
             url = image_data[0].decode("utf-8")
             # We return images in this method
             if(url.rsplit('.', 1)[1].lower() == 'pdf'):
-                url = url.rsplit('.', 1)[0] + '-1.png'
+                url = url.rsplit('.', 1)[0] + '.svg'
 
         return url
     except mySQLException as e:
