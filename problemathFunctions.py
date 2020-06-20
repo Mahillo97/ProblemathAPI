@@ -869,18 +869,19 @@ def getProblemSheet(con, dictionaryProblems):
             else:
                 newTexFile.write('\\usepackage{' + package + '}\n')
 
-        # We start the document
+        # We state the title
+        newTexFile.write('\\title{\\sf\\bfseries \\large Hoja de problemas. Generada con ProbleMath}\n')
 
+        # We start the document
         newTexFile.write('\\begin{document}\n')
 
         # We set the styling for the page problem
         newTexFile.write('\\frenchspacing\n')
-        newTexFile.write(
-            '\\leftline{\\sf\\bfseries \\large Hoja de problemas. Generada con ProbleMath}\n')
-        newTexFile.write('\\medskip\n')
-        newTexFile.write('\\hrule\n')
-        newTexFile.write('\\bigskip\n')
-        newTexFile.write('\\vskip.5cm\n')
+        newTexFile.write('\\maketitle\n')
+        #newTexFile.write('\\medskip\n')
+        #newTexFile.write('\\hrule\n')
+        #newTexFile.write('\\bigskip\n')
+        #newTexFile.write('\\vskip.5cm\n')
         newTexFile.write('\\newcounter{ejem}\n')
         newTexFile.write('\\begin{list}{\\sf\\bfseries\\arabic{ejem}.}\n')
         newTexFile.write('{\\usecounter{ejem}\\leftmargin 0pt}\n')
