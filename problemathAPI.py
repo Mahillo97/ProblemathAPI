@@ -274,7 +274,6 @@ class problemPDFFull(Resource):
 class resourceDependency(Resource):
     def get(self, dependency_id):
 
-        # Select in the database the info for the selected problem
         con = None
         try:
             # Check if dependency_id is an int

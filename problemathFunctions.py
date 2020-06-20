@@ -369,7 +369,7 @@ def getDependency(con, dependency_id):
             url = image_data[0].decode("utf-8")
             # We return images in this method
             if(url.rsplit('.', 1)[1].lower() == 'pdf'):
-                url = url.rsplit('.', 1)[0] + '.svg'
+                url = url.rsplit('.', 1)[0] + '-1.png'
 
         return url
     except mySQLException as e:
@@ -518,9 +518,6 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     newTexFileStatementPDF.write(
                         '\\textit{Publicado en ' + mag + '}')
                 newTexFileStatementPDF.write('\\medskip \n')
-
-                # We state the styles directives
-                newTexFileStatement.write('\\setlength{\\parindent}{0pt}\n')
 
                 # We write the statement
                 newTexFileStatementPDF.write(statementTex + '\n')
