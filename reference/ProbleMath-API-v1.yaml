@@ -73,42 +73,42 @@ paths:
                   value:
                     problems:
                       - id: 10
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
                       - id: 11
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
                       - id: 12
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
                       - id: 15
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
                       - id: 21
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
@@ -302,42 +302,42 @@ paths:
                   value:
                     problems:
                       - id: 10
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
                       - id: 11
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
                       - id: 12
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
                       - id: 15
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
                       - id: 21
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
@@ -494,42 +494,42 @@ paths:
                   value:
                     problems:
                       - id: 10
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
                       - id: 11
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
                       - id: 12
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
                       - id: 15
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
                       - id: 21
-                        magazine: Gaceta Matemática Española
+                        magazine: Gaceta Matemï¿½tica Espaï¿½ola
                         proposer: Florin Stunescu
                         tags:
-                          - análisis
+                          - anï¿½lisis
                           - desigualdad
                           - integral
                         tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
@@ -871,50 +871,17 @@ paths:
               examples:
                 Result of a correct search:
                   value:
-                    problems:
-                      - id: 10
-                        magazine: Gaceta Matemática Española
-                        proposer: Florin Stunescu
-                        tags:
-                          - análisis
-                          - desigualdad
-                          - integral
-                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
-                      - id: 11
-                        magazine: Gaceta Matemática Española
-                        proposer: Florin Stunescu
-                        tags:
-                          - análisis
-                          - desigualdad
-                          - integral
-                        tex: "\n\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{PROBLEMA 324.} \\textit{Propuesto por Florin St\\u{a}nescu, Serban Cioculescu School, G\\u{a}e\\c{s}ti, Ruman\\'{i}a.}\n\nSea $f : [0,1] \\rightarrow \\mathbb{R} $ una funci\\'{o}n convexa tal que $f(0) = 0$. Probar que\n\n\\[\n\\int_0^1f(x)\\,dx \\geq 4 \\int_0^{1/2}f(x)\\,dx.\n\\]\n\n"
+                    dep_state: 0
+                    id: 12
+                    magazine: The American Mathematical Monthly
+                    proposer: Julien Sorel
+                    solutions:
                       - id: 12
-                        magazine: Gaceta Matemática Española
-                        proposer: Florin Stunescu
-                        tags:
-                          - análisis
-                          - desigualdad
-                          - integral
-                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
-                      - id: 15
-                        magazine: Gaceta Matemática Española
-                        proposer: Florin Stunescu
-                        tags:
-                          - análisis
-                          - desigualdad
-                          - integral
-                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
-                      - id: 21
-                        magazine: Gaceta Matemática Española
-                        proposer: Florin Stunescu
-                        tags:
-                          - análisis
-                          - desigualdad
-                          - integral
-                        tex: "\n\n\\thispagestyle{empty}\n\n\\noindent\\textbf{2013.} \\textit{Proposed by Julien Sorel, PNI, Piatra Neamt, Romania.}\n\n\\medskip\n\n\\noindent{For a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
-                Result when you exceed the maximum page or there are no problems:
-                  value:
-                    problems: []
+                        solver: Alejandro Mahillo
+                        tex: "\n\nFirst of all we draw the cube that contains the tetrahedron and the tetraedron.\n\\begin{figure}\n\\begin{center}\n\\includegraphics[width=0.4\\textwidth]{Data/dp/19.pdf}\n\\end{center}\n\\end{figure}\nThis cube is divided in five pieces, four equal corners with the same number of points and the tetrahedron. Then we have $N=C-4Q$, where $C$ is the number of points lying inside or on the boundary of the cube and $Q$ is the number of points lying inside or on the outer faces of each one of the corners. We easily see that the number of points $C$ is $C=(n+1)^3$.\n\nNow, to evaluate $Q$, we take the right triangles that appear when the corner is intersected with a plane of the form $z=n-1-i$, where $i=0,\\dots,n-1$. \n\\begin{figure}\n\\begin{center}\n\\includegraphics[width=0.95\\textwidth]{Data/dp/20.pdf}\n\\end{center}\n\\end{figure}\nThe number of points in each plane is $\\frac{(i+1)(i+2)}{2}$ and \n\\[\nQ=\\sum\\limits_{i=0}^{n-1} \\frac{(i+1)(i+2)}{2} = \\frac{n(n+1)(n+2)}{6}.\n\\]\nIn this way, we have\n\\begin{align*}\nN=C-4Q&=(n+1)^3-4 \\frac{n(n+1)(n+2)}{6}\\\\&=\\frac{n+1}{3}(3(n+1)^2 - 2n(n+2))=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\end{align*}\n"
+                    tags:
+                      - combinatoria
+                    tex: "\n\nFor a positive integer $n$, let $\\mathcal{T}$ be the regular tetrahedron in $\\mathbb{R}^3$ with vertices $O\\:(0, 0, 0)$, $A\\:(0, n, n)$, $B\\:(n, 0, n)$ and $C\\:(n, n, 0)$.\n Show that the number $N$ of lattice points ($x$, $y$, $z$) (i.e., points with integer coordinates $x,y,z$) lying inside or on the boundary of $\\mathcal{T}$ is\n\\[\nN=\\frac{1}{3}(n+1)(n^2+2n+3).\n\\]\n"
         '400':
           description: Bad Request
           content:
