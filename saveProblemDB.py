@@ -90,8 +90,8 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
             dep = 0
 
         # Check tha variables to create the Query String
-        sqlQueryBeginningStatement = 'INSERT INTO problem (Tex, URL_PDF_State, URL_PDF_Full, URL_WEB, Dep_State'
-        sqlQueryValues = 'VALUES (%s, %s, %s, %s, %s'
+        sqlQueryBeginningStatement = 'INSERT INTO problem (Tex, URL_PDF_State, URL_PDF_Full, Dep_State'
+        sqlQueryValues = 'VALUES (%s, %s, %s, %s'
         tupleValuesStatement = ()
 
         # We read the file
@@ -145,7 +145,7 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                     texStatement =  texStatement + line[:indexComment] + '\n'
 
         tupleValuesStatement = tupleValuesStatement + \
-            (texStatement, 'placeholder', 'placeholder', 'placeholder', dep)
+            (texStatement, 'placeholder', 'placeholder', dep)
 
         if(mag):
             sqlQueryBeginningStatement = sqlQueryBeginningStatement + ', Magazine'
@@ -169,11 +169,10 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
 
         # We update the placeholders
         mycursorUpdate = con.cursor(prepared=True)
-        sqlQueryUpdate = 'UPDATE problem SET URL_PDF_State=%s, URL_PDF_Full=%s, URL_WEB=%s WHERE id=%s'
+        sqlQueryUpdate = 'UPDATE problem SET URL_PDF_State=%s, URL_PDF_Full=%s WHERE id=%s'
         URL_PDF_State = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfState.pdf'
         URL_PDF_Full = DATA_DIRECTORY+'/'+str(idProblem)+'/pdfFull.pdf'
-        URL_WEB = DATA_DIRECTORY+'/'+str(idProblem)+'/web/statement/statement.html'
-        tupleValuesUpdate = (URL_PDF_State, URL_PDF_Full, URL_WEB, idProblem)
+        tupleValuesUpdate = (URL_PDF_State, URL_PDF_Full, idProblem)
         mycursorUpdate.execute(sqlQueryUpdate, tupleValuesUpdate)
         mycursorUpdate.close()
 
@@ -254,8 +253,8 @@ def saveStatementDB(con, absoluteURL, tags, mag, prop):
                     sqlQueryUpdateDependencies, (idProblem, idDep))
 
         return dict(idProblem=idProblem, absoluteURL=absoluteURL, URL_PDF_State=URL_PDF_State,
-                    URL_PDF_Full=URL_PDF_Full,URL_WEB=URL_WEB, texProblem=texStatement, packagesWithoutOptions=packagesWithoutOptions,
-                    packagesWithOptions=packagesWithOptions, dep = dep)
+                    URL_PDF_Full=URL_PDF_Full, texProblem=texStatement, packagesWithoutOptions=packagesWithoutOptions,
+                    packagesWithOptions=packagesWithOptions)
 
     except mySQLException as e:
         con.rollback()
@@ -334,8 +333,8 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
             dep = 0
 
         # Check tha variables to create the Query String
-        sqlQueryBeginningSolu = 'INSERT INTO solution (Id_Problem, Tex, Dep_Solu, URL_WEB'
-        sqlQueryValuesSolu = 'VALUES (%s, %s, %s, %s'
+        sqlQueryBeginningSolu = 'INSERT INTO solution (Id_Problem, Tex, Dep_Solu'
+        sqlQueryValuesSolu = 'VALUES (%s, %s, %s'
         tupleValuesSolu = ()
 
         # We read the file
@@ -366,7 +365,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 else:
                     texSolu =  texSolu + line[:indexComment] + '\n'
 
-        tupleValuesSolu = tupleValuesSolu + (idProblem, texSolu, 0, 'placeholder')
+        tupleValuesSolu = tupleValuesSolu + (idProblem, texSolu, 0)
 
         if(solver):
             sqlQueryBeginningSolu = sqlQueryBeginningSolu + ', Solver'
@@ -384,14 +383,6 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
         idSolu = mycursorSolu.lastrowid
         mycursorSolu.close()
 
-        # Update the placehodlers
-        mycursorUpdateWeb = con.cursor(prepared=True)
-        sqlQueryUpdateWeb = 'UPDATE solution SET URL_WEB=%s WHERE id=%s'
-        URL_WEB = DATA_DIRECTORY+'/'+str(idProblem)+'/web/solutions/'+ str(idSolu)+'/solution.html'
-        tupleValuesUpdateWeb = (URL_WEB, idSolu)
-        mycursorUpdateWeb.execute(sqlQueryUpdateWeb, tupleValuesUpdateWeb)
-        mycursorUpdateWeb.close()
-
         # We must update the dependency table to update the foreign keys
         if(dep == 1):
             mycursorUpdateDependencies = con.cursor(prepared=True)
@@ -402,7 +393,7 @@ def saveSolutionDB(con, absoluteURLSolution, idProblem, solver):
                 mycursorUpdateDependencies.execute(
                     sqlQueryUpdateDependencies, (idSolu, idDep))
 
-        return dict(idSolu=idSolu, solver=solver, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution, URL_WEB=URL_WEB, dep=dep)
+        return dict(idSolu=idSolu, solver=solver, texSolu=texSolu, absoluteURLSolution=absoluteURLSolution)
 
     except mySQLException as e:
         con.rollback()
