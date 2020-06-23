@@ -397,6 +397,10 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     dictSavedStatement['idProblem']), solutionDict['solver']))
 
             if listDictSavedSolu:
+                # We create the directories
+                cliMakeDir = 'mkdir ' + DATA_DIRECTORY + \
+                    '/'+str(dictSavedStatement['idProblem'])
+                os.system(cliMakeDir)
 
                 # Now we compile the statement
                 urlNewTexStatementPDF = dictSavedStatement['URL_PDF_State'].rsplit('.', 1)[
