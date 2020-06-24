@@ -8,10 +8,8 @@ from connections import dbConnectMySQL
 from connections import mySQLException
 import saveProblemDB
 import os
-import re
 import time
 import shutil
-import subprocess
 
 UPLOAD_FOLDER = 'Data/tmp'
 DATA_DIRECTORY = 'Data'
@@ -376,60 +374,6 @@ def getDependency(con, dependency_id):
         raise e
 
 """****************************************************************************************************
-* Description: method to return the current values of a client in the database
-* INPUT: customer id
-* OUTPUT: a JSON with the data client
-****************************************************************************************************"""
-
-
-def getHTMLStatement(con, dependency_id):
-
-    try:
-        # Check tha variables to create the Query String
-        sqlQuery = 'SELECT P.URL_WEB FROM problem as P WHERE P.Id = %s'
-
-        # Execute the query
-        mycursor = con.cursor(prepared=True)
-        mycursor.execute(sqlQuery, (dependency_id,))
-        html_data = mycursor.fetchone()
-        mycursor.close()
-
-        url = None
-        if(html_data):
-            url = html_data[0].decode("utf-8")
-        return url
-    except mySQLException as e:
-        raise e
-
-
-"""****************************************************************************************************
-* Description: method to return the current values of a client in the database
-* INPUT: customer id
-* OUTPUT: a JSON with the data client
-****************************************************************************************************"""
-
-
-def getHTMLSolution(con, dependency_id):
-
-    try:
-        # Check tha variables to create the Query String
-        sqlQuery = 'SELECT S.URL_WEB FROM solution as S WHERE S.Id = %s'
-
-        # Execute the query
-        mycursor = con.cursor(prepared=True)
-        mycursor.execute(sqlQuery, (dependency_id,))
-        html_data = mycursor.fetchone()
-        mycursor.close()
-
-        url = None
-        if(html_data):
-            url = html_data[0].decode("utf-8")
-        return url
-    except mySQLException as e:
-        raise e
-
-
-"""****************************************************************************************************
 * Description: method to return the bills of a client
 * INPUT: customer id
 * OUTPUT: a JSON with the data client
@@ -453,35 +397,20 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     dictSavedStatement['idProblem']), solutionDict['solver']))
 
             if listDictSavedSolu:
-
                 # We create the directories
                 cliMakeDir = 'mkdir ' + DATA_DIRECTORY + \
                     '/'+str(dictSavedStatement['idProblem'])
-                cliMakeDirWeb = 'mkdir ' + DATA_DIRECTORY + \
-                    '/'+str(dictSavedStatement['idProblem']) + '/web'
-                cliMakeDirStatement = 'mkdir ' + DATA_DIRECTORY + \
-                    '/'+str(dictSavedStatement['idProblem']) + '/web/statement'
-                cliMakeDirSolutions = 'mkdir ' + DATA_DIRECTORY + \
-                    '/'+str(dictSavedStatement['idProblem']) + '/web/solutions'
                 os.system(cliMakeDir)
-                os.system(cliMakeDirWeb)
-                os.system(cliMakeDirStatement)
-                os.system(cliMakeDirSolutions)
 
                 # Now we compile the statement
-                # For that we must create a two new tex, one for the pdf and the second one for the web.
                 urlNewTexStatementPDF = dictSavedStatement['URL_PDF_State'].rsplit('.', 1)[
                     0] + '.tex'
-                urlNewTexStatementWEB = dictSavedStatement['URL_WEB'].rsplit('.', 1)[
-                    0] + '.tex'
                 statementTex = dictSavedStatement['texProblem']
+
                 newTexFileStatementPDF = open(urlNewTexStatementPDF, "w+")
-                newTexFileStatementWEB = open(urlNewTexStatementWEB, "w+")
 
                 # We start the document
                 newTexFileStatementPDF.write(
-                    '\\documentclass[12pt]{article}\n')
-                newTexFileStatementWEB.write(
                     '\\documentclass[12pt]{article}\n')
 
                 # We write the packages
@@ -490,23 +419,17 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     for tuplePackage in dictSavedStatement['packagesWithOptions']:
                         newTexFileStatementPDF.write(
                             '\\usepackage[' + tuplePackage[0] + ']{' + tuplePackage[1] + '}\n')
-                        newTexFileStatementWEB.write(
-                            '\\usepackage[' + tuplePackage[0] + ']{' + tuplePackage[1] + '}\n')
 
                 if(dictSavedStatement['packagesWithoutOptions']):
                     for package in dictSavedStatement['packagesWithoutOptions']:
                         newTexFileStatementPDF.write(
                             '\\usepackage{' + package + '}\n')
-                        newTexFileStatementWEB.write(
-                            '\\usepackage{' + package + '}\n')
 
                 # We state the styles directives
                 newTexFileStatementPDF.write('\\setlength{\\parindent}{0pt}\n')
-                newTexFileStatementWEB.write('\\setlength{\\parindent}{0pt}\n')
 
                 # We start the statement
                 newTexFileStatementPDF.write('\\begin{document}\n')
-                newTexFileStatementWEB.write('\\begin{document}\n')
 
                 # First the data of the problem this just goes into the pdf
                 newTexFileStatementPDF.write(
@@ -521,15 +444,11 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
 
                 # We write the statement
                 newTexFileStatementPDF.write(statementTex + '\n')
-                newTexFileStatementWEB.write(statementTex + '\n')
 
                 # We end the document
                 newTexFileStatementPDF.write('\\end{document}')
-                newTexFileStatementWEB.write('\\end{document}')
                 newTexFileStatementPDF.flush()
-                newTexFileStatementWEB.flush()
                 newTexFileStatementPDF.close()
-                newTexFileStatementWEB.close()
 
                 # We compile the new .tex for the pdf
                 # We compile it twice just in case we need some references
@@ -540,32 +459,8 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                 resultStatement = os.system(cliCompile)
                 errorCodeStatement = resultStatement >> 8
 
-                if (errorCodeStatement == 0):
-                    # We compile the new .tex for the web
-                    try:
-                        from subprocess import DEVNULL  # Python 3
-                    except ImportError:
-                        DEVNULL = open(os.devnull, 'r+b', 0)
-
-                    if (dictSavedStatement['dep']==1):
-                        configFile = 'html5mathjaxPDF'
-                    else:
-                        configFile = 'html5mathjax'
-                    
-                    process = subprocess.Popen(['make4ht', '-d', dictSavedStatement['URL_WEB'].rsplit('/', 1)[0], '-um', 'html5+mathjaxnode',
-                           '-c', configFile , urlNewTexStatementWEB], stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)          
-                    _, err = process.communicate()
-                    if err:
-                        errorCodeStatement == 1
-                    
-                    #Remove the aux files generated
-                    for f in os.listdir('.'):
-                        if re.search(r'statement*', f):
-                            os.remove(os.path.join('.', f))
-
                 # We delete the aux .tex files
                 os.remove(urlNewTexStatementPDF)
-                os.remove(urlNewTexStatementWEB)
 
                 # Now we compile the statement with the solutions
                 # For that we must create a new tex
@@ -599,93 +494,30 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     '\\textbf{PROBLEMA ' + str(dictSavedStatement['idProblem']) + '} ')
                 if(prop):
                     newTexFileFull.write(
-                        '\\textit{Propuesto por ' + prop + '}')
+                        '\\textit{Propuesto por ' + prop + '}.')
                 if(mag):
-                    newTexFileFull.write('\\textit{Publicado en ' + mag + '}')
+                    newTexFileFull.write('\\textit{Publicado en ' + mag + '}.')
                 newTexFileFull.write('\\medskip \n')
 
                 newTexFileFull.write(statementTex + '\n')
 
-                #Var to check error
-                errorCodeFull = 0
-
-                # We write each solution
-                # We create an html for each solution             
+                # We write each solution          
                 for counter, DictSavedSolu in enumerate(listDictSavedSolu):
 
-                    #We create the directory
-                    cliMakeDirSoluID = 'mkdir ' + DATA_DIRECTORY + \
-                        '/'+str(dictSavedStatement['idProblem']) + '/web/solutions/' + str(DictSavedSolu['idSolu'])
-                    os.system(cliMakeDirSoluID)
-
-                    #We create the auxTex
-                    urlAuxSolutionTex = DictSavedSolu['URL_WEB'].rsplit('.', 1)[
-                        0] + '.tex'
-                    newTexFileSoluAux = open(urlAuxSolutionTex, "w+")
-
-                    # We start the document
-                    newTexFileSoluAux.write('\\documentclass[12pt]{article}\n')
-
-                    # We write the packages
-                    if(dictSavedStatement['packagesWithOptions']):
-                        for tuplePackage in dictSavedStatement['packagesWithOptions']:
-                            newTexFileSoluAux.write(
-                                '\\usepackage[' + tuplePackage[0] + ']{' + tuplePackage[1] + '}\n')
-
-                    if(dictSavedStatement['packagesWithoutOptions']):
-                        for package in dictSavedStatement['packagesWithoutOptions']:
-                            newTexFileSoluAux.write('\\usepackage{' + package + '}\n')
-
-                    # We state the styles directives
-                    newTexFileSoluAux.write('\\setlength{\\parindent}{0pt}\n')
-
-                    # We write the solution
-                    newTexFileSoluAux.write('\\begin{document}\n')
-
-
-                    # We write the solution in the full doc and the small ones
+                    # We write the solution 
                     solutionTex = DictSavedSolu['texSolu']
                     solver = DictSavedSolu['solver']
+                    newTexFileFull.write('\\medskip \n')
+
                     newTexFileFull.write(
                         '\\textbf{Solución ' + str(counter+1) + '.}')
                     if(solver):
                         newTexFileFull.write(
                             '\\textit{ Enviada por: ' + solver + '}')
-                    newTexFileFull.write('\\\\\n')
-
+                    newTexFileFull.write('\\hfill \\break\n')
                     newTexFileFull.write(solutionTex)
-                    newTexFileSoluAux.write(solutionTex)
-
-                    newTexFileFull.write('\\medskip')
-
-                    # We end the Auxdocument
-                    newTexFileSoluAux.write('\\end{document}')
-                    newTexFileSoluAux.flush()
-                    newTexFileSoluAux.close()
-                                       
-                    try:
-                        from subprocess import DEVNULL  # Python 3
-                    except ImportError:
-                        DEVNULL = open(os.devnull, 'r+b', 0)
-
-                    if (DictSavedSolu['dep']==1):
-                        configFile = 'html5mathjaxPDF'
-                    else:
-                        configFile = 'html5mathjax'
-                    
-                    process = subprocess.Popen(['make4ht', '-d', DictSavedSolu['URL_WEB'].rsplit('/', 1)[0], '-um', 'html5+mathjaxnode',
-                           '-c', configFile, urlAuxSolutionTex], stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)          
-                    _, err = process.communicate()
-                    if err:
-                        errorCodeFull == errorCodeFull + 1
-
-                    #Remove the aux files generated
-                    for f in os.listdir('.'):
-                        if re.search(r'solution*', f):
-                            os.remove(os.path.join('.', f))
-
-                    # We delete the aux .tex
-                    os.remove(urlAuxSolutionTex)
+                    newTexFileFull.write('\\hfill \\break\n')
+                    newTexFileFull.write('\\newline\n')
 
                 # We end the main document
                 newTexFileFull.write('\\end{document}')
@@ -699,7 +531,7 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                         '.', 1)[0] + ' ' + urlNewTex
                 os.system(cliCompile)
                 resultFull = os.system(cliCompile)
-                errorCodeFull = errorCodeFull + (resultFull >> 8)
+                errorCodeFull =  resultFull >> 8
 
                 # We delete the aux .tex
                 os.remove(urlNewTex)
