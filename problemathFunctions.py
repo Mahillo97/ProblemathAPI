@@ -494,9 +494,9 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     '\\textbf{PROBLEMA ' + str(dictSavedStatement['idProblem']) + '} ')
                 if(prop):
                     newTexFileFull.write(
-                        '\\textit{Propuesto por ' + prop + '}')
+                        '\\textit{Propuesto por ' + prop + '}.')
                 if(mag):
-                    newTexFileFull.write('\\textit{Publicado en ' + mag + '}')
+                    newTexFileFull.write('\\textit{Publicado en ' + mag + '}.')
                 newTexFileFull.write('\\medskip \n')
 
                 newTexFileFull.write(statementTex + '\n')
@@ -507,14 +507,17 @@ def saveProblem(con, absoluteURL, solutionsData, tags, mag, prop):
                     # We write the solution 
                     solutionTex = DictSavedSolu['texSolu']
                     solver = DictSavedSolu['solver']
+                    newTexFileFull.write('\\medskip \n')
+
                     newTexFileFull.write(
                         '\\textbf{Solución ' + str(counter+1) + '.}')
                     if(solver):
                         newTexFileFull.write(
                             '\\textit{ Enviada por: ' + solver + '}')
-                    newTexFileFull.write('\\newline\n')
+                    newTexFileFull.write('\\hfill \\break\n')
                     newTexFileFull.write(solutionTex)
-                    newTexFileFull.write('\\\\\n')
+                    newTexFileFull.write('\\hfill \\break\n')
+                    newTexFileFull.write('\\newline\n')
 
                 # We end the main document
                 newTexFileFull.write('\\end{document}')
