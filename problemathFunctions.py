@@ -52,13 +52,13 @@ def getProblemList(con, tags, mag, prop, tamPag, pag):
             if(mag):
                 if(tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + (mag,)
-                sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
+                tuple_values = tuple_values + ("%"+mag+"%",)
+                sqlQueryWhere = sqlQueryWhere + 'P.Magazine LIKE %s '
             if(prop):
                 if(mag or tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + (prop,)
-                sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
+                tuple_values = tuple_values + ("%"+prop+"%",)
+                sqlQueryWhere = sqlQueryWhere + 'P.Proposer LIKE %s '
 
         if((tamPag or tamPag == 0) and (pag or pag == 0)):
             sqlQueryLimit = 'LIMIT %s, %s'
@@ -121,13 +121,13 @@ def getProblemListSize(con, tags, mag, prop):
             if(mag):
                 if(tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + (mag,)
-                sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
+                tuple_values = tuple_values + ("%"+mag+"%",)
+                sqlQueryWhere = sqlQueryWhere + 'P.Magazine LIKE %s '
             if(prop):
                 if(mag or tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + (prop,)
-                sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
+                tuple_values = tuple_values + ("%"+prop+"%",)
+                sqlQueryWhere = sqlQueryWhere + 'P.Proposer LIKE %s '
 
         sqlQuery = sqlQueryBeginning + sqlQueryWhere
 
