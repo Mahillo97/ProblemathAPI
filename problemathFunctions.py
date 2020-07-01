@@ -829,7 +829,7 @@ def getProblemSheet(con, dictionaryProblems):
                 if(auxTex):
                     info = ""
                     if(auxSolver):
-                        info = info + "Enviada por " + auxSolver + "."
+                        info = info + " Enviada por " + auxSolver + "."
                     newTexFile.write(
                         '\\emph{Solución ' + str(solutionsCounter) + '.' + info +'} \n')
                     newTexFile.write(auxTex + '\n')
