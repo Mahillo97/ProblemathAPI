@@ -441,7 +441,7 @@ class getProblemSheet(Resource):
                         PDFDirectory = urlPDF[:urlPDF.rindex("/")]
                         return send_from_directory(PDFDirectory, PDFName)
                     else:
-                        abort(400,'Compile problems')            
+                        abort(400,'Compilation errors')            
             abort(400,'Unvalid params')
         except mySQLException:
             log.exception('mySQL Exception')

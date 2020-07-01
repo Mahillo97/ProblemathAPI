@@ -52,13 +52,13 @@ def getProblemList(con, tags, mag, prop, tamPag, pag):
             if(mag):
                 if(tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + ("%"+mag+"%",)
-                sqlQueryWhere = sqlQueryWhere + 'P.Magazine LIKE %s '
+                tuple_values = tuple_values + (mag,)
+                sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
             if(prop):
                 if(mag or tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + ("%"+prop+"%",)
-                sqlQueryWhere = sqlQueryWhere + 'P.Proposer LIKE %s '
+                tuple_values = tuple_values + (prop,)
+                sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
 
         if((tamPag or tamPag == 0) and (pag or pag == 0)):
             sqlQueryLimit = 'LIMIT %s, %s'
@@ -121,13 +121,13 @@ def getProblemListSize(con, tags, mag, prop):
             if(mag):
                 if(tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + ("%"+mag+"%",)
-                sqlQueryWhere = sqlQueryWhere + 'P.Magazine LIKE %s '
+                tuple_values = tuple_values + (mag,)
+                sqlQueryWhere = sqlQueryWhere + 'P.Magazine=%s '
             if(prop):
                 if(mag or tags):
                     sqlQueryWhere = sqlQueryWhere + 'and '
-                tuple_values = tuple_values + ("%"+prop+"%",)
-                sqlQueryWhere = sqlQueryWhere + 'P.Proposer LIKE %s '
+                tuple_values = tuple_values + (prop,)
+                sqlQueryWhere = sqlQueryWhere + 'P.Proposer=%s '
 
         sqlQuery = sqlQueryBeginning + sqlQueryWhere
 
@@ -218,6 +218,54 @@ def getProblemTex(con, problem_id):
     except mySQLException as e:
         raise e
 
+"""****************************************************************************************************
+* Description: method to return the data of a problem
+* INPUT: problem_id is an integer
+* OUTPUT: a dict with the data of a 
+****************************************************************************************************"""
+
+
+def getProblemProp(con, problem_id):
+
+    try:
+        # Tex variable
+        problemProp = None
+        # Check tha variables to create the Query String
+        sqlQuery = 'SELECT P.Proposer FROM problem as P WHERE P.Id = %s'
+        # Execute the query
+        mycursor = con.cursor(prepared=True)
+        mycursor.execute(sqlQuery, (problem_id,))
+        problem = mycursor.fetchone()
+        if (problem and problem[0]):
+            problemProp = problem[0].decode("utf-8")
+        return problemProp
+    except mySQLException as e:
+        raise e
+
+"""****************************************************************************************************
+* Description: method to return the data of a problem
+* INPUT: problem_id is an integer
+* OUTPUT: a dict with the data of a 
+****************************************************************************************************"""
+
+
+def getProblemMag(con, problem_id):
+
+    try:
+        # Tex variable
+        problemMag = None
+        # Check tha variables to create the Query String
+        sqlQuery = 'SELECT P.Magazine FROM problem as P WHERE P.Id = %s'
+        # Execute the query
+        mycursor = con.cursor(prepared=True)
+        mycursor.execute(sqlQuery, (problem_id,))
+        problem = mycursor.fetchone()
+        if (problem and problem[0]):
+            problemMag = problem[0].decode("utf-8")
+        return problemMag
+    except mySQLException as e:
+        raise e
+
 
 """****************************************************************************************************
 * Description: method to return the data of a problem
@@ -240,6 +288,31 @@ def getSolutionTex(con, problem_id, solution_id):
         if (solution):
             solutionTex = solution[0].decode("utf-8")
         return solutionTex
+    except mySQLException as e:
+        raise e
+
+
+"""****************************************************************************************************
+* Description: method to return the data of a problem
+* INPUT: problem_id is an integer
+* OUTPUT: a dict with the data of a 
+****************************************************************************************************"""
+
+
+def getSolutionSolver(con, problem_id, solution_id):
+
+    try:
+        # Tex variable
+        solutionSolver = None
+        # Check tha variables to create the Query String
+        sqlQuery = 'SELECT S.Solver FROM solution as S WHERE S.Id = %s and S.Id_Problem=%s'
+        # Execute the query
+        mycursor = con.cursor(prepared=True)
+        mycursor.execute(sqlQuery, (solution_id, problem_id))
+        solution = mycursor.fetchone()
+        if (solution and solution[0]):
+            solutionSolver = solution[0].decode("utf-8")
+        return solutionSolver
     except mySQLException as e:
         raise e
 
@@ -724,10 +797,21 @@ def getProblemSheet(con, dictionaryProblems):
 
             # we get the tex from the database
             auxTex = getProblemTex(con, problem_id)
+            auxProp = getProblemProp(con, problem_id)
+            auxMag = getProblemMag(con, problem_id)
 
-            # We write the problem in if it exits
+            # We write the problem if it exits
             if(auxTex):
-                newTexFile.write('\\item ' + auxTex + '\n')
+                info = ""
+                if(auxProp or auxMag):
+                    info = info + '\\emph{'
+                    if(auxProp):
+                        info = info + ' Propuesto por ' + auxProp + '.'
+                    if(auxMag):
+                        info = info + ' Publicado en ' + auxMag + '.'
+                    info = info + '} \n'
+                newTexFile.write('\\item '+ info + auxTex + '\n')
+                newTexFile.write('\\vspace{1em} \n')
 
             # We get the solutions id
             solution_ids = dictionaryProblems.get('solution'+str(n))
@@ -739,12 +823,17 @@ def getProblemSheet(con, dictionaryProblems):
 
                 # We get the tex from the database
                 auxTex = getSolutionTex(con, problem_id, solution_id)
+                auxSolver = getSolutionSolver(con, problem_id, solution_id)
 
                 # We write the solution
                 if(auxTex):
+                    info = ""
+                    if(auxSolver):
+                        info = info + "Enviada por " + auxSolver + "."
                     newTexFile.write(
-                        '\\emph{Solución ' + str(solutionsCounter) + '.}\\\\\n')
+                        '\\emph{Solución ' + str(solutionsCounter) + '.' + info +'} \n')
                     newTexFile.write(auxTex + '\n')
+                    newTexFile.write('\\medskip')
                     newTexFile.write('\\medskip')
                     solutionsCounter = solutionsCounter + 1
 
